@@ -8,31 +8,39 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h1>🎮 AI LifeQuest Frontend</h1>
-      <p>¡Tu entorno de React + Vite + TypeScript está listo y funcionando!</p>
-      
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <h1 style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>
+        🎮 AI LifeQuest Frontend
+      </h1>
+      <p style={{ color: 'var(--text-muted)' }}>
+        ¡Paleta Cyberpunk / Gaming aplicada correctamente!
+      </p>
+
       <div style={{
         marginTop: '2rem',
-        padding: '1.5rem',
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        display: 'inline-block'
+        padding: '2rem',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '12px',
+        display: 'inline-block',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
       }}>
-        <h2>Perfil del Jugador</h2>
-        <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-          ⭐ XP Actual: <span style={{ color: '#e67e22' }}>{xp} PTS</span>
+        <h2 style={{ marginBottom: '1rem' }}>Perfil del Jugador</h2>
+        <p style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+          ⭐ XP Actual: <span style={{ color: 'var(--xp-color)' }}>{xp} PTS</span>
         </p>
         <button 
           onClick={handleGanarXp}
           style={{
-            padding: '0.6rem 1.2rem',
+            padding: '0.8rem 1.5rem',
             fontSize: '1rem',
-            backgroundColor: '#27ae60',
-            color: 'white',
+            fontWeight: 'bold',
+            backgroundColor: 'var(--primary)',
+            color: '#ffffff',
             border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
+            borderRadius: '6px',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s'
           }}
         >
           ¡Completar Reto de Prueba (+50 XP)!
