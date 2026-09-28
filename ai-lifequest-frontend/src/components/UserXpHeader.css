@@ -1,0 +1,122 @@
+/* Contenedor Principal del Header */
+.xp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Marca / Logo (Izquierda) */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* Logo más grande en PC (Aumentado a 58px) */
+.header-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+  transition: transform 0.2s ease;
+}
+
+.header-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Área de Stats y Perfil (Derecha) */
+.header-user-section {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* Badge de XP */
+.xp-badge {
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid var(--xp-color);
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+}
+
+/* Imagen del ícono de XP */
+.xp-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6));
+}
+
+.xp-amount {
+  color: var(--xp-color);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Perfil de Usuario */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-name {
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Círculo de Iniciales (Avatar) */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #818CF8 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+}
+
+/* 📱 REGLAS MÓVILES (Android y pantallas <= 768px) */
+@media (max-width: 768px) {
+  /* Ocultar el texto de la app para dejar SOLO el logo */
+  .header-title {
+    display: none;
+  }
+
+  /* Ocultar el nombre en texto del usuario */
+  .user-name {
+    display: none;
+  }
+
+  /* Logo ajustado para pantallas móviles (Aumentado a 48px) */
+  .header-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .xp-header {
+    padding: 0.6rem 1rem;
+  }
+}

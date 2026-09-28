@@ -1,17 +1,17 @@
 :root {
   /* Paleta Opción 1: Cyberpunk / Gaming */
-  --bg-primary: #0F172A;      /* Azul Noche Oscuro (Fondo general) */
-  --bg-card: #1E293B;         /* Azul Slate (Fondo de tarjetas/módulos) */
-  --primary: #6366F1;         /* Indigo/Púrpura Eléctrico (Botones y acentos) */
-  --primary-hover: #4F46E5;   /* Estado hover para botones */
-  --xp-color: #F59E0B;        /* Amarillo Ámbar / Oro (XP y recompensas) */
-  --success: #10B981;         /* Verde Neón (Metas completadas / éxito) */
-  --text-main: #F8FAFC;       /* Texto blanco/claro principal */
-  --text-muted: #94A3B8;      /* Texto secundario grisáceo */
+  --bg-primary: #0F172A;      /* Azul Noche Oscuro */
+  --bg-card: #1E293B;         /* Azul Slate */
+  --primary: #6366F1;         /* Indigo / Púrpura Eléctrico */
+  --primary-hover: #4F46E5;   /* Hover para botones */
+  --xp-color: #F59E0B;        /* Oro / XP */
+  --success: #10B981;         /* Verde Neón */
+  --text-main: #F8FAFC;       /* Blanco / Texto principal */
+  --text-muted: #94A3B8;      /* Gris / Texto secundario */
   --border-color: #334155;    /* Bordes discretos */
 }
 
-/* Reset y estilos globales */
+/* Reset Global */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -23,4 +23,5 @@ body {
   color: var(--text-main);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
 }

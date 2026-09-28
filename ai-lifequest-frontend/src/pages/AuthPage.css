@@ -1,0 +1,113 @@
+/* Contenedor principal 100% Pantalla */
+.auth-page-container {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+/* Ola de Gradiente Diagonal (Esk. Inferior Izq -> Sup. Der) */
+.auth-diagonal-wave {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 10% 90%, 
+    rgba(99, 102, 241, 0.35) 0%, 
+    rgba(245, 158, 11, 0.15) 45%, 
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Partículas animadas */
+.auth-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.7;
+  pointer-events: none;
+  animation: floatParticle infinite ease-in-out;
+}
+
+@keyframes floatParticle {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-15px) scale(1.4);
+    opacity: 0.9;
+  }
+}
+
+/* Tarjeta Central Glassmorphism Responsive */
+.auth-card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 420px;
+  background-color: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+/* Encabezado con Logo */
+.auth-logo-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-logo-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.5));
+  margin-bottom: 0.5rem;
+}
+
+.auth-app-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.auth-app-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Selector de pestañas Login / Registro */
+.auth-toggle-container {
+  display: flex;
+  background-color: var(--bg-primary);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.auth-toggle-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+}
+
+.auth-toggle-btn.active {
+  background-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
