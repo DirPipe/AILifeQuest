@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Rocket } from 'lucide-react';
 import { apiService } from '../services/api';
 import type { User } from '../types/index';
 import './LoginForm.css';
@@ -24,8 +25,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
     try {
       setIsLoading(true);
-      // Consumimos el simulador de API para iniciar sesión
-      const user = await apiService.login(email);
+      const user = await apiService.login(email, password);
       onSuccess(user);
     } catch (error: any) {
       setErrorMessage(
@@ -71,7 +71,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       </div>
 
       <button type="submit" className="submit-btn" disabled={isLoading}>
-        {isLoading ? 'Iniciando Sesión...' : 'Entrar a LifeQuest 🚀'}
+        {isLoading ? (
+          'Iniciando Sesión...'
+        ) : (
+          <>
+            Entrar a LifeQuest
+            <Rocket className="inline-icon" />
+          </>
+        )}
       </button>
     </form>
   );

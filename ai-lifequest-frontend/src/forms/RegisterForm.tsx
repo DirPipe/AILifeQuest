@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Swords } from 'lucide-react';
 import type { User } from '../types/index';
 import { apiService } from '../services/api';
 import './RegisterForm.css';
@@ -23,11 +24,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       return;
     }
 
+    if (password.length < 6) {
+      setErrorMessage('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
     try {
       setIsLoading(true);
-      
-      // Llamada desacoplada a la API (simulada por ahora)
-      const registeredUser = await apiService.register({ name, email });
+
+      const registeredUser = await apiService.register({ name, email, password });
       onSuccess(registeredUser);
     } catch (error: any) {
       setErrorMessage(
@@ -88,7 +93,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       </div>
 
       <button type="submit" className="submit-btn" disabled={isLoading}>
-        {isLoading ? 'Creando cuenta...' : '¡Registrarse y Jugar! ⚔️'}
+        {isLoading ? (
+          'Creando cuenta...'
+        ) : (
+          <>
+            Registrarse y Jugar
+            <Swords className="inline-icon" />
+          </>
+        )}
       </button>
     </form>
   );
