@@ -289,7 +289,7 @@ seed_user() {
 
   seed_goal_with_challenges \
     "$user_id" \
-    "Demo - Dominar Arquitectura de Software" \
+    "Demo - Dominar Arquitectura de Software de $slug" \
     "Practicar patrones, capas y buenas decisiones de diseño para proyectos empresariales." \
     "Tecnologia" \
     "2026-11-30" \
@@ -300,7 +300,7 @@ seed_user() {
 
   seed_goal_with_challenges \
     "$user_id" \
-    "Demo - Mejorar rutina personal de estudio" \
+    "Demo - Mejorar rutina personal de estudio de $slug" \
     "Organizar sesiones de aprendizaje constantes durante la semana." \
     "Estudios" \
     "2026-12-15" \
