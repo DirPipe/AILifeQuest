@@ -5,12 +5,43 @@ set -euo pipefail
 API_BASE_URL="${API_BASE_URL:-http://localhost:8080/api}"
 SEED_PASSWORD="${SEED_PASSWORD:-123456}"
 
+fail() {
+  echo "Error: $*" >&2
+  exit 1
+}
+
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Falta instalar '$1'."
     echo "Instalacion sugerida en Ubuntu/Linux Mint: sudo apt install $1"
     exit 1
   fi
+}
+
+validate_json() {
+  local json="$1"
+  local context="$2"
+
+  if ! jq -e . >/dev/null 2>&1 <<<"$json"; then
+    echo "$json" >&2
+    fail "La respuesta de $context no es JSON valido."
+  fi
+}
+
+extract_required_field() {
+  local json="$1"
+  local field="$2"
+  local context="$3"
+  local value
+
+  validate_json "$json" "$context"
+  value="$(jq -r --arg field "$field" '.[$field] // empty' <<<"$json")"
+  if [[ -z "$value" || "$value" == "null" ]]; then
+    echo "$json" | jq . >&2
+    fail "La respuesta de $context no contiene el campo requerido '$field'."
+  fi
+
+  echo "$value"
 }
 
 api_request() {
@@ -36,13 +67,21 @@ api_request() {
   if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
     cat "$response_file" >&2
     echo
-    echo "Error llamando $method $path. HTTP $status" >&2
     rm -f "$response_file"
-    exit 1
+    fail "Llamada fallida: $method $path. HTTP $status"
   fi
 
   cat "$response_file"
   rm -f "$response_file"
+}
+
+check_api_ready() {
+  local status
+
+  status="$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE_URL/goals" || true)"
+  if [[ "$status" == "000" ]]; then
+    fail "No se pudo conectar con $API_BASE_URL. Asegurate de iniciar el backend con 'mvn spring-boot:run'."
+  fi
 }
 
 slugify() {
@@ -72,6 +111,7 @@ register_or_login_user() {
   status="$(echo "$response" | tail -n 1)"
 
   if [[ "$status" == "201" || "$status" == "200" ]]; then
+    validate_json "$body" "POST /auth/register"
     echo "$body"
     return
   fi
@@ -87,8 +127,7 @@ register_or_login_user() {
 
   echo "$body"
   echo
-  echo "No se pudo crear o iniciar sesion para $email. HTTP $status" >&2
-  exit 1
+  fail "No se pudo crear o iniciar sesion para $email. HTTP $status"
 }
 
 find_goal_id_by_title() {
@@ -99,6 +138,7 @@ find_goal_id_by_title() {
 
   encoded_user_id="$(jq -rn --arg value "$user_id" '$value|@uri')"
   goals="$(api_request GET "/goals?userId=$encoded_user_id")"
+  validate_json "$goals" "GET /goals"
   echo "$goals" | jq -r --arg title "$title" '.[] | select(.title == $title) | .goalId' | head -n 1
 }
 
@@ -127,7 +167,7 @@ create_or_get_goal() {
     '{userId: $userId, title: $title, description: $description, category: $category, targetDate: $targetDate}')"
 
   response="$(api_request POST "/goals" "$payload")"
-  echo "$response" | jq -r '.goalId'
+  extract_required_field "$response" "goalId" "POST /goals"
 }
 
 find_challenge_id_by_title() {
@@ -138,6 +178,7 @@ find_challenge_id_by_title() {
 
   encoded_goal_id="$(jq -rn --arg value "$goal_id" '$value|@uri')"
   challenges="$(api_request GET "/challenges?goalId=$encoded_goal_id")"
+  validate_json "$challenges" "GET /challenges"
   echo "$challenges" | jq -r --arg title "$title" '.[] | select(.title == $title) | .challengeId' | head -n 1
 }
 
@@ -149,6 +190,7 @@ get_challenge_status() {
 
   encoded_goal_id="$(jq -rn --arg value "$goal_id" '$value|@uri')"
   challenges="$(api_request GET "/challenges?goalId=$encoded_goal_id")"
+  validate_json "$challenges" "GET /challenges"
   echo "$challenges" | jq -r --arg challengeId "$challenge_id" '.[] | select(.challengeId == $challengeId) | .status' | head -n 1
 }
 
@@ -175,7 +217,7 @@ create_or_get_challenge() {
     '{goalId: $goalId, title: $title, description: $description, xpReward: $xpReward}')"
 
   response="$(api_request POST "/challenges" "$payload")"
-  echo "$response" | jq -r '.challengeId'
+  extract_required_field "$response" "challengeId" "POST /challenges"
 }
 
 complete_challenge_if_needed() {
@@ -185,6 +227,9 @@ complete_challenge_if_needed() {
   local payload
 
   status="$(get_challenge_status "$goal_id" "$challenge_id")"
+  if [[ -z "$status" ]]; then
+    fail "No se encontro el reto $challenge_id al consultar la meta $goal_id."
+  fi
   if [[ "$status" == "COMPLETED" ]]; then
     return
   fi
@@ -240,7 +285,7 @@ seed_user() {
   slug="$(slugify "$name")"
   echo "Preparando datos para $name <$email>"
   user="$(register_or_login_user "$name" "$email")"
-  user_id="$(echo "$user" | jq -r '.userId')"
+  user_id="$(extract_required_field "$user" "userId" "auth para $email")"
 
   seed_goal_with_challenges \
     "$user_id" \
@@ -279,9 +324,11 @@ seed_user() {
 main() {
   require_command curl
   require_command jq
+  check_api_ready
 
   echo "Poblando datos demo en $API_BASE_URL"
   echo "Contrasena demo para todos los usuarios: $SEED_PASSWORD"
+  echo "Modo: solo API. Las tablas achievements y user_achievements quedan sin seed hasta tener endpoint."
   echo
 
   seed_user "Alex Cyber" "alex@lifequest.ai"
@@ -291,6 +338,7 @@ main() {
 
   echo
   echo "Seed terminado."
+  echo "Se poblaron usuarios, metas, retos, progreso y transacciones XP mediante la API."
   echo "Puedes iniciar sesion con cualquiera de estos correos usando la contrasena: $SEED_PASSWORD"
 }
 
