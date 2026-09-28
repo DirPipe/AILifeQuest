@@ -1,29 +1,29 @@
 export type ChallengeStatus = 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED';
-export type GoalStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
-export interface User {
+export interface Challenge {
   id: string;
-  name: string;
-  email: string;
-  totalXp: number;
+  goalId: string;
+  title: string;
+  description?: string;
+  xpReward: number;
+  status: ChallengeStatus;
+  completedAt?: string; // 👈 Campo opcional de fecha de finalización
 }
 
 export interface Goal {
   id: string;
   userId: string;
   title: string;
-  description: string;
-  category: string;
-  targetDate: string;
+  description?: string;
+  category?: string;
+  targetDate?: string;
   progressPercentage: number;
-  status: GoalStatus;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 }
 
-export interface Challenge {
+export interface User {
   id: string;
-  goalId: string;
-  title: string;
-  description: string;
-  xpReward: number;
-  status: ChallengeStatus;
+  name: string;
+  email: string;
+  totalXp: number;
 }

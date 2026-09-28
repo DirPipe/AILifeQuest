@@ -1,0 +1,104 @@
+.challenge-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  gap: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.challenge-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.challenge-card.completed {
+  border-color: rgba(16, 185, 129, 0.3);
+  opacity: 0.85;
+}
+
+.challenge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.challenge-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.challenge-card.completed .challenge-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.challenge-description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.challenge-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.challenge-xp-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--xp-color);
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--xp-color);
+  white-space: nowrap;
+}
+
+.complete-btn {
+  padding: 0.5rem 0.9rem;
+  background-color: var(--success);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.complete-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.completed-badge {
+  padding: 0.4rem 0.8rem;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .challenge-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .challenge-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+}

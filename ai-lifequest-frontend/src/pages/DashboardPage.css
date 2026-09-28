@@ -1,0 +1,181 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  padding-bottom: 3rem;
+}
+
+.dashboard-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.dashboard-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.dashboard-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.add-goal-btn {
+  width: auto;
+  padding: 0.6rem 1.2rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Secciones independientes */
+.dashboard-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-heading {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: left;
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.completed-section-heading {
+  color: var(--success);
+  border-bottom-color: rgba(16, 185, 129, 0.3);
+}
+
+.empty-goals-card {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background-color: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.empty-goals-title {
+  color: var(--text-main);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.empty-goals-desc {
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  font-size: 0.88rem;
+}
+
+.add-challenge-toggle-area {
+  text-align: right;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-challenge-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.toggle-challenge-btn:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .dashboard-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-goal-btn {
+    width: 100%;
+  }
+}
+
+/* Barra contenedora de Pestañas / Tabs */
+.dashboard-tabs-container {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.8rem;
+}
+
+/* Botón de Pestaña */
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.2rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.tab-btn:hover {
+  border-color: var(--primary);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+/* Estado Activo para la Pestaña Seleccionada */
+.tab-btn.active {
+  background-color: rgba(99, 102, 241, 0.15);
+  border-color: var(--primary);
+  color: var(--text-main);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Insignia con el conteo numérico de metas */
+.tab-count-badge {
+  padding: 0.15rem 0.5rem;
+  background-color: var(--bg-primary);
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.tab-btn.active .tab-count-badge {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 600px) {
+  .dashboard-tabs-container {
+    width: 100%;
+  }
+
+  .tab-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.85rem;
+  }
+}

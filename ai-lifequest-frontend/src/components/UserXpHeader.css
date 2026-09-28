@@ -1,4 +1,4 @@
-/* Contenedor Principal del Header */
+/* Contenedor del Header */
 .xp-header {
   display: flex;
   align-items: center;
@@ -12,20 +12,17 @@
   z-index: 100;
 }
 
-/* Marca / Logo (Izquierda) */
 .header-brand {
   display: flex;
   align-items: center;
   gap: 0.85rem;
 }
 
-/* Logo más grande en PC (Aumentado a 58px) */
 .header-logo {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
-  transition: transform 0.2s ease;
 }
 
 .header-title {
@@ -33,40 +30,82 @@
   font-weight: 700;
   color: var(--text-main);
   margin: 0;
-  letter-spacing: 0.5px;
 }
 
-/* Área de Stats y Perfil (Derecha) */
 .header-user-section {
   display: flex;
   align-items: center;
   gap: 1.2rem;
 }
 
-/* Badge de XP */
-.xp-badge {
-  background-color: rgba(245, 158, 11, 0.12);
+/* Badge del Nivel y Barra XP Clickeable */
+.xp-level-container {
+  background-color: rgba(245, 158, 11, 0.08);
   border: 1px solid var(--xp-color);
-  padding: 0.4rem 0.9rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
   box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
 }
 
-/* Imagen del ícono de XP */
-.xp-icon {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6));
+.modal-level-subtext {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
-.xp-amount {
-  color: var(--xp-color);
+.xp-level-container:hover {
+  background-color: rgba(245, 158, 11, 0.18);
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+}
+
+.level-number-badge {
+  background-color: var(--xp-color);
+  color: #0F172A;
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.header-xp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 90px;
+}
+
+.header-xp-text {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  font-size: 0.95rem;
+  color: var(--xp-color);
+}
+
+.header-xp-bar-track {
+  width: 100%;
+  height: 6px;
+  background-color: rgba(15, 23, 42, 0.6);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.header-xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);
+  border-radius: 10px;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+  transition: width 0.4s ease;
 }
 
 /* Perfil de Usuario */
@@ -82,41 +121,26 @@
   font-size: 0.95rem;
 }
 
-/* Círculo de Iniciales (Avatar) */
 .user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary) 0%, #818CF8 100%);
-  color: #FFFFFF;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 0.95rem;
   border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
 }
 
-/* 📱 REGLAS MÓVILES (Android y pantallas <= 768px) */
 @media (max-width: 768px) {
-  /* Ocultar el texto de la app para dejar SOLO el logo */
-  .header-title {
+  .header-title, .user-name {
     display: none;
   }
-
-  /* Ocultar el nombre en texto del usuario */
-  .user-name {
-    display: none;
-  }
-
-  /* Logo ajustado para pantallas móviles (Aumentado a 48px) */
   .header-logo {
-    width: 48px;
-    height: 48px;
-  }
-
-  .xp-header {
-    padding: 0.6rem 1rem;
+    width: 44px;
+    height: 44px;
   }
 }

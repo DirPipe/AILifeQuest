@@ -1,0 +1,122 @@
+.goal-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s ease;
+}
+
+/* Estilo distintivo para metas al 100% */
+.goal-card.goal-completed {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+}
+
+.goal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.goal-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: left;
+}
+
+.goal-category {
+  align-self: flex-start;
+  padding: 0.2rem 0.6rem;
+  background-color: rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #818CF8;
+  text-transform: uppercase;
+}
+
+.goal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.goal-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.goal-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.goal-challenges-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+/* Botón Desplegable (Acordeón) */
+.challenges-toggle-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.9rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.challenges-toggle-btn:hover {
+  border-color: var(--primary);
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+.challenges-toggle-title {
+  font-weight: 600;
+}
+
+.toggle-arrow {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+/* Lista Desplegable */
+.challenges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.no-challenges-text {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: left;
+  padding: 0.5rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
