@@ -6,6 +6,7 @@ import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
 import com.errorcapa8.ailifequest.domain.valueobject.Progress;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
 import com.errorcapa8.ailifequest.infrastructure.entity.GoalEntity;
+import com.errorcapa8.ailifequest.infrastructure.entity.GoalProgressEntity;
 
 import java.util.List;
 
@@ -13,7 +14,8 @@ public final class GoalMapper {
     private GoalMapper() {
     }
 
-    public static Goal toDomain(GoalEntity entity, List<Challenge> challenges) {
+    public static Goal toDomain(GoalEntity entity, GoalProgressEntity progressEntity, List<Challenge> challenges) {
+        Progress progress = progressEntity == null ? new Progress(0.0) : new Progress(progressEntity.getProgressPercentage());
         return new Goal(
                 new GoalId(entity.getId()),
                 new UserId(entity.getUserId()),
@@ -21,7 +23,7 @@ public final class GoalMapper {
                 entity.getDescription(),
                 entity.getCategory(),
                 entity.getTargetDate(),
-                new Progress(entity.getProgressPercentage()),
+                progress,
                 entity.getStatus(),
                 challenges
         );
@@ -40,7 +42,6 @@ public final class GoalMapper {
         entity.setDescription(goal.getDescription());
         entity.setCategory(goal.getCategory());
         entity.setTargetDate(goal.getTargetDate());
-        entity.setProgressPercentage(goal.getProgress().percentage());
         entity.setStatus(goal.getStatus());
     }
 }

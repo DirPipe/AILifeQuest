@@ -33,6 +33,8 @@ public class UserEntity {
     private LocalDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
 
     @PrePersist
     void onCreate() {
