@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Lockfile de gestores no usados en este proyecto
+pnpm-lock.yaml
