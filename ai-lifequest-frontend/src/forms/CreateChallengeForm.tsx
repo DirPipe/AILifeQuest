@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Swords } from 'lucide-react';
 import { apiService } from '../services/api';
 import type { Challenge } from '../types/index';
 import './CreateChallengeForm.css';
@@ -49,7 +50,10 @@ export const CreateChallengeForm: React.FC<CreateChallengeFormProps> = ({
 
   return (
     <div className="challenge-form-card">
-      <h4 className="challenge-form-title">⚔️ Agregar Nuevo Reto a esta Meta</h4>
+      <h4 className="challenge-form-title">
+        <Swords className="inline-icon primary-icon" />
+        Agregar Nuevo Reto a esta Meta
+      </h4>
       {errorMessage && <div className="form-error" style={{ marginBottom: '0.8rem' }}>{errorMessage}</div>}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>

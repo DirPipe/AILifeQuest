@@ -30,6 +30,9 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .challenge-card.completed .challenge-title {

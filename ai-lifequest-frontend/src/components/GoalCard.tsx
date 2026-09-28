@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CalendarDays, Target, Trophy } from 'lucide-react';
 import type { Goal, Challenge } from '../types/index';
 import { ProgressBar } from './ProgressBar';
 import { ChallengeCard } from './ChallengeCard';
@@ -27,13 +28,16 @@ export const GoalCard: React.FC<GoalCardProps> = ({
         <div className="goal-title-area">
           {goal.category && <span className="goal-category">{goal.category}</span>}
           <h2 className="goal-title">
-            {isGoalCompleted && '🏆 '}
+            {isGoalCompleted && <Trophy className="inline-icon success-icon" />}
             {goal.title}
           </h2>
           {goal.description && <p className="goal-description">{goal.description}</p>}
         </div>
         {goal.targetDate && (
-          <span className="goal-date">📅 {goal.targetDate}</span>
+          <span className="goal-date">
+            <CalendarDays className="inline-icon muted-icon" />
+            {goal.targetDate}
+          </span>
         )}
       </div>
 
@@ -48,7 +52,8 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           type="button"
         >
           <span className="challenges-toggle-title">
-            🎯 Retos ({completedCount}/{challenges.length})
+            <Target className="inline-icon primary-icon" />
+            Retos ({completedCount}/{challenges.length})
           </span>
           <span className="toggle-arrow">
             {isExpanded ? '▲ Ocultar retos' : '▼ Ver retos'}

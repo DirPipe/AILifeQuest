@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CheckCircle2, Swords } from 'lucide-react';
 import type { Challenge } from '../types/index';
 import xpImg from '../assets/xp.png';
 import './ChallengeCard.css';
@@ -28,7 +29,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
     <div className={`challenge-card ${isCompleted ? 'completed' : ''}`}>
       <div className="challenge-info">
         <span className="challenge-title">
-          {isCompleted && '✅ '}
+          {isCompleted && <CheckCircle2 className="inline-icon success-icon" />}
           {challenge.title}
         </span>
         {challenge.description && (
@@ -50,7 +51,14 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
             onClick={handleCompleteClick}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Guardando...' : 'Completar ⚔️'}
+            {isSubmitting ? (
+              'Guardando...'
+            ) : (
+              <>
+                Completar
+                <Swords className="inline-icon" />
+              </>
+            )}
           </button>
         )}
       </div>

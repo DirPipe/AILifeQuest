@@ -25,3 +25,35 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+
+.inline-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  stroke-width: 2.2;
+  vertical-align: middle;
+}
+
+.submit-btn,
+.complete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.primary-icon {
+  color: var(--primary);
+}
+
+.success-icon {
+  color: var(--success);
+}
+
+.xp-icon-color {
+  color: var(--xp-color);
+}
+
+.muted-icon {
+  color: var(--text-muted);
+}

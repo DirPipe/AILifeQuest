@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Target, Trophy } from 'lucide-react';
 import type { User, Goal, Challenge } from '../types/index';
 import { apiService } from '../services/api';
 import { UserXpHeader } from '../components/UserXpHeader';
@@ -111,7 +112,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
             className={`tab-btn ${activeTab === 'ACTIVE' ? 'active' : ''}`}
             onClick={() => setActiveTab('ACTIVE')}
           >
-            <span>🎯 Metas Activas</span>
+            <Target className="inline-icon primary-icon" />
+            <span>Metas Activas</span>
             <span className="tab-count-badge">{activeGoals.length}</span>
           </button>
 
@@ -120,7 +122,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
             className={`tab-btn ${activeTab === 'COMPLETED' ? 'active' : ''}`}
             onClick={() => setActiveTab('COMPLETED')}
           >
-            <span>🏆 Metas Completadas</span>
+            <Trophy className="inline-icon success-icon" />
+            <span>Metas Completadas</span>
             <span className="tab-count-badge">{completedGoals.length}</span>
           </button>
         </div>

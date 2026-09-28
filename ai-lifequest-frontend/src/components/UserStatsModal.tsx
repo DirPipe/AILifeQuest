@@ -1,4 +1,5 @@
 import React from 'react';
+import { CheckCircle2, Swords, Target, Trophy, X } from 'lucide-react';
 import type { User } from '../types/index';
 import { calculateLevelData } from '../utils/levelCalculator';
 import xpImg from '../assets/xp.png';
@@ -35,7 +36,7 @@ export const UserStatsModal: React.FC<UserStatsModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" onClick={onClose}>
-          ✕
+          <X className="inline-icon" />
         </button>
 
         {/* Encabezado sin la palabra Jugador ni Estrella */}
@@ -77,28 +78,32 @@ export const UserStatsModal: React.FC<UserStatsModalProps> = ({
         <div className="modal-stats-grid-2">
           <div className="stat-box">
             <span className="stat-value" style={{ color: 'var(--primary)' }}>
-              🎯 {activeGoalsCount}
+              <Target className="inline-icon" />
+              {activeGoalsCount}
             </span>
             <span className="stat-label">Metas Activas</span>
           </div>
 
           <div className="stat-box">
             <span className="stat-value" style={{ color: 'var(--success)' }}>
-              🏆 {completedGoalsCount}
+              <Trophy className="inline-icon" />
+              {completedGoalsCount}
             </span>
             <span className="stat-label">Metas Terminadas</span>
           </div>
 
           <div className="stat-box">
             <span className="stat-value" style={{ color: '#818CF8' }}>
-              ⚔️ {activeChallengesCount}
+              <Swords className="inline-icon" />
+              {activeChallengesCount}
             </span>
             <span className="stat-label">Retos Activos</span>
           </div>
 
           <div className="stat-box">
             <span className="stat-value" style={{ color: 'var(--success)' }}>
-              ✅ {completedChallengesCount}
+              <CheckCircle2 className="inline-icon" />
+              {completedChallengesCount}
             </span>
             <span className="stat-label">Retos Terminados</span>
           </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Rocket, Target } from 'lucide-react';
 import { apiService } from '../services/api';
 import type { Goal } from '../types/index';
 import './CreateGoalForm.css';
@@ -49,7 +50,10 @@ export const CreateGoalForm: React.FC<CreateGoalFormProps> = ({ userId, onGoalCr
 
   return (
     <div className="goal-form-card">
-      <h3 className="goal-form-title">🎯 Crear Nueva Meta / Quest</h3>
+      <h3 className="goal-form-title">
+        <Target className="inline-icon primary-icon" />
+        Crear Nueva Meta / Quest
+      </h3>
       {errorMessage && <div className="form-error" style={{ marginBottom: '1rem' }}>{errorMessage}</div>}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -110,7 +114,14 @@ export const CreateGoalForm: React.FC<CreateGoalFormProps> = ({ userId, onGoalCr
         </div>
 
         <button type="submit" className="submit-btn" disabled={isLoading}>
-          {isLoading ? 'Creando Meta...' : '🚀 Guardar Meta'}
+          {isLoading ? (
+            'Creando Meta...'
+          ) : (
+            <>
+              <Rocket className="inline-icon" />
+              Guardar Meta
+            </>
+          )}
         </button>
       </form>
     </div>
