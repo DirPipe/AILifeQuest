@@ -1,0 +1,31 @@
+.app-loading-screen {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.app-loading-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.18);
+}
+
+.app-loading-title {
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.app-loading-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
