@@ -22,7 +22,7 @@ public class Goal {
     private List<Challenge> challenges;
 
     public Goal(GoalId id, UserId userId, String title, String description, String category, LocalDate targetDate) {
-        this(id, userId, title, description, category, targetDate, new Progress(0.0), GoalStatus.IN_PROGRESS, new ArrayList<>());
+        this(id, userId, title, description, category, targetDate, new Progress(0.0), GoalStatus.ACTIVE, new ArrayList<>());
     }
 
     public Goal(GoalId id, UserId userId, String title, String description, String category, LocalDate targetDate,
@@ -46,12 +46,12 @@ public class Goal {
         this.category = category;
         this.targetDate = targetDate;
         this.progress = progress == null ? new Progress(0.0) : progress;
-        this.status = status == null ? GoalStatus.IN_PROGRESS : status;
+        this.status = status == null ? GoalStatus.ACTIVE : status;
         this.challenges = challenges == null ? new ArrayList<>() : new ArrayList<>(challenges);
     }
 
     public void addChallenge(Challenge challenge) {
-        if (this.status != GoalStatus.IN_PROGRESS) {
+        if (this.status != GoalStatus.ACTIVE) {
             throw new DomainException("No se pueden agregar retos a una meta finalizada.");
         }
         if (challenge == null) {
@@ -74,7 +74,7 @@ public class Goal {
         if (this.progress.percentage() == 100.0 && !challenges.isEmpty()) {
             this.status = GoalStatus.COMPLETED;
         } else if (this.status == GoalStatus.COMPLETED) {
-            this.status = GoalStatus.IN_PROGRESS;
+            this.status = GoalStatus.ACTIVE;
         }
     }
 

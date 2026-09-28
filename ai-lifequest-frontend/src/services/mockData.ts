@@ -43,7 +43,7 @@ export const MOCK_GOALS: Goal[] = [
     category: 'Salud/Deporte',
     targetDate: '2026-11-30',
     progressPercentage: 33,
-    status: 'IN_PROGRESS',
+    status: 'ACTIVE',
   },
   {
     id: 'goal-3',
@@ -63,7 +63,7 @@ export const MOCK_GOALS: Goal[] = [
     category: 'Personal',
     targetDate: '2026-12-20',
     progressPercentage: 50,
-    status: 'IN_PROGRESS',
+    status: 'ACTIVE',
   },
   {
     id: 'goal-5',
@@ -73,7 +73,7 @@ export const MOCK_GOALS: Goal[] = [
     category: 'Tecnología',
     targetDate: '2026-10-30',
     progressPercentage: 25,
-    status: 'IN_PROGRESS',
+    status: 'ACTIVE',
   },
 ];
 

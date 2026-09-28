@@ -28,7 +28,7 @@ class GoalTest {
         goal.replaceChallenges(List.of(first, second));
 
         assertThat(goal.getProgress().percentage()).isEqualTo(50.0);
-        assertThat(goal.getStatus()).isEqualTo(GoalStatus.IN_PROGRESS);
+        assertThat(goal.getStatus()).isEqualTo(GoalStatus.ACTIVE);
     }
 
     @Test

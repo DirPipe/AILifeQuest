@@ -18,7 +18,7 @@ export interface Goal {
   category?: string;
   targetDate?: string;
   progressPercentage: number;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 }
 
 export interface User {
