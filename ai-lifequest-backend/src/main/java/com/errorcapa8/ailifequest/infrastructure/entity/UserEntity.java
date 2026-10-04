@@ -41,11 +41,20 @@ public class UserEntity {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+        setDeactivatedAtIfNeeded(now);
     }
 
     @PreUpdate
     void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        updatedAt = now;
+        setDeactivatedAtIfNeeded(now);
+    }
+
+    private void setDeactivatedAtIfNeeded(LocalDateTime timestamp) {
+        if (status == UserStatus.INACTIVE && deactivatedAt == null) {
+            deactivatedAt = timestamp;
+        }
     }
 
     public UUID getId() { return id; }
