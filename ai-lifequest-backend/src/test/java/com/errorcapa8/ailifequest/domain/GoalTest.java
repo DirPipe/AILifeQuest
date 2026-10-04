@@ -9,6 +9,7 @@ import com.errorcapa8.ailifequest.domain.valueobject.UserId;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,5 +42,18 @@ class GoalTest {
 
         assertThat(goal.getProgress().percentage()).isEqualTo(100.0);
         assertThat(goal.getStatus()).isEqualTo(GoalStatus.COMPLETED);
+    }
+
+    @Test
+    void updateDetailsChangesEditableFields() {
+        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", null);
+        LocalDate targetDate = LocalDate.now().plusDays(7);
+
+        goal.updateDetails("  Aprender Spring  ", "Practicar APIs", "Backend", targetDate);
+
+        assertThat(goal.getTitle()).isEqualTo("Aprender Spring");
+        assertThat(goal.getDescription()).isEqualTo("Practicar APIs");
+        assertThat(goal.getCategory()).isEqualTo("Backend");
+        assertThat(goal.getTargetDate()).isEqualTo(targetDate);
     }
 }

@@ -1,9 +1,12 @@
 package com.errorcapa8.ailifequest.application.service;
 
 import com.errorcapa8.ailifequest.application.dto.request.CreateChallengeRequestDTO;
+import com.errorcapa8.ailifequest.application.dto.request.UpdateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.ChallengeResponseDTO;
 import com.errorcapa8.ailifequest.application.dto.response.GameProgressResponseDTO;
 import com.errorcapa8.ailifequest.application.exception.NotFoundException;
+import com.errorcapa8.ailifequest.domain.enums.UserStatus;
+import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.Challenge;
 import com.errorcapa8.ailifequest.domain.model.Goal;
 import com.errorcapa8.ailifequest.domain.model.User;
@@ -43,6 +46,11 @@ public class ChallengeService {
         GoalId goalId = new GoalId(request.goalId());
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new NotFoundException("Meta no encontrada."));
+        User user = userRepository.findById(goal.getUserId())
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new DomainException("Un usuario inactivo no puede crear nuevos retos.");
+        }
         Challenge challenge = new Challenge(new ChallengeId(UUID.randomUUID()), goalId, request.title(), request.description(), new XP(request.xpReward()));
         Challenge saved = challengeRepository.save(challenge);
         goal.addChallenge(saved);
@@ -82,5 +90,19 @@ public class ChallengeService {
                 DtoMapper.toChallengeResponse(challenge),
                 earnedXp.value()
         );
+    }
+
+    @Transactional
+    public ChallengeResponseDTO updateChallenge(UUID challengeIdValue, UpdateChallengeRequestDTO request) {
+        Challenge challenge = challengeRepository.findById(new ChallengeId(challengeIdValue))
+                .orElseThrow(() -> new NotFoundException("Reto no encontrado."));
+        GoalId goalId = new GoalId(request.goalId());
+        if (!challenge.getGoalId().equals(goalId)) {
+            throw new DomainException("El reto no pertenece a la meta indicada.");
+        }
+        goalRepository.findById(goalId)
+                .orElseThrow(() -> new NotFoundException("Meta no encontrada."));
+        challenge.updateDetails(request.title(), request.description(), request.xpReward());
+        return DtoMapper.toChallengeResponse(challengeRepository.save(challenge));
     }
 }

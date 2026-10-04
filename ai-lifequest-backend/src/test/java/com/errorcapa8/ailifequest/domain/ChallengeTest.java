@@ -52,4 +52,15 @@ class ChallengeTest {
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("bloqueado");
     }
+
+    @Test
+    void updateDetailsChangesEditableFields() {
+        Challenge challenge = new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(UUID.randomUUID()), "Leer", null, new XP(10));
+
+        challenge.updateDetails("  Escribir  ", "Escribir resumen", 25);
+
+        assertThat(challenge.getTitle()).isEqualTo("Escribir");
+        assertThat(challenge.getDescription()).isEqualTo("Escribir resumen");
+        assertThat(challenge.getXpReward().value()).isEqualTo(25);
+    }
 }

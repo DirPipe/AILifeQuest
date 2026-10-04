@@ -2,6 +2,7 @@ package com.errorcapa8.ailifequest.presentation.controller;
 
 import com.errorcapa8.ailifequest.application.dto.request.CompleteChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.CreateChallengeRequestDTO;
+import com.errorcapa8.ailifequest.application.dto.request.UpdateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.ChallengeResponseDTO;
 import com.errorcapa8.ailifequest.application.dto.response.GameProgressResponseDTO;
 import com.errorcapa8.ailifequest.application.service.ChallengeService;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,5 +44,10 @@ public class ChallengeController {
     @PatchMapping("/complete")
     public GameProgressResponseDTO completeChallenge(@Valid @RequestBody CompleteChallengeRequestDTO request) {
         return challengeService.completeChallenge(request.challengeId());
+    }
+
+    @PatchMapping("/{challengeId}")
+    public ChallengeResponseDTO updateChallenge(@PathVariable UUID challengeId, @Valid @RequestBody UpdateChallengeRequestDTO request) {
+        return challengeService.updateChallenge(challengeId, request);
     }
 }

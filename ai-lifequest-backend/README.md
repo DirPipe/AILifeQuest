@@ -118,8 +118,20 @@ mvn test
 | POST | `/api/auth/register` | Registrar usuario con `name`, `email` y `password`. |
 | POST | `/api/auth/login` | Iniciar sesion con `email` y `password`. |
 | GET | `/api/users?userId=...` | Consultar usuario por identificador. |
+| PATCH | `/api/users/{userId}` | Actualizar `name` y/o `email` de un usuario. |
+| PATCH | `/api/users/{userId}/deactivate` | Marcar un usuario como inactivo sin borrar su historial. |
 | POST | `/api/goals` | Crear meta asociada a un usuario. |
 | GET | `/api/goals?userId=...` | Listar metas de un usuario. |
+| PATCH | `/api/goals/{goalId}` | Editar datos de una meta validando el `userId` del body. |
 | POST | `/api/challenges` | Crear reto asociado a una meta. |
 | GET | `/api/challenges?goalId=...` | Listar retos de una meta. |
+| PATCH | `/api/challenges/{challengeId}` | Editar datos de un reto validando el `goalId` del body. |
 | PATCH | `/api/challenges/complete` | Completar reto enviando `challengeId` en el body. |
+
+## Reglas De Actualizacion
+
+- Un usuario inactivo no puede crear nuevas metas ni retos.
+- Desactivar un usuario conserva sus metas, retos, XP y transacciones.
+- Para editar una meta se debe enviar el `userId` dueño de la meta.
+- Para editar un reto se debe enviar el `goalId` al que pertenece.
+- Los endpoints `PATCH` son parciales: los campos en `null` no se modifican.

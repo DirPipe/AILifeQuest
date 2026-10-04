@@ -54,6 +54,21 @@ public class Challenge {
         return this.xpReward;
     }
 
+    public void updateDetails(String title, String description, Integer xpReward) {
+        if (title != null) {
+            if (title.isBlank()) {
+                throw new IllegalArgumentException("El titulo del reto no puede estar vacio");
+            }
+            this.title = title.trim();
+        }
+        if (description != null) {
+            this.description = description;
+        }
+        if (xpReward != null) {
+            this.xpReward = new XP(xpReward);
+        }
+    }
+
     public boolean isCompleted() {
         return this.status == ChallengeStatus.COMPLETED;
     }

@@ -38,6 +38,21 @@ public class User {
         }
     }
 
+    public void updateProfile(String name, String email) {
+        if (name != null) {
+            if (name.isBlank()) {
+                throw new IllegalArgumentException("El nombre del usuario no puede estar vacio");
+            }
+            this.name = name.trim();
+        }
+        if (email != null) {
+            if (email.isBlank()) {
+                throw new IllegalArgumentException("El email del usuario no puede estar vacio");
+            }
+            this.email = email.trim().toLowerCase();
+        }
+    }
+
     public void deactivate() {
         this.status = UserStatus.INACTIVE;
     }

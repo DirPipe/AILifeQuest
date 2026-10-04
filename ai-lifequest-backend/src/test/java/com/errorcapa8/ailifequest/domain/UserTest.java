@@ -1,6 +1,7 @@
 package com.errorcapa8.ailifequest.domain;
 
 import com.errorcapa8.ailifequest.domain.model.User;
+import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.junit.jupiter.api.Test;
@@ -26,5 +27,24 @@ class UserTest {
         assertThatThrownBy(() -> new XP(-1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("XP");
+    }
+
+    @Test
+    void updateProfileChangesEditableFields() {
+        User user = new User(new UserId(UUID.randomUUID()), "Ana", "ana@example.com");
+
+        user.updateProfile("  Ana Maria  ", "  ANA.MARIA@example.com  ");
+
+        assertThat(user.getName()).isEqualTo("Ana Maria");
+        assertThat(user.getEmail()).isEqualTo("ana.maria@example.com");
+    }
+
+    @Test
+    void deactivateMarksUserInactive() {
+        User user = new User(new UserId(UUID.randomUUID()), "Ana", "ana@example.com");
+
+        user.deactivate();
+
+        assertThat(user.getStatus()).isEqualTo(UserStatus.INACTIVE);
     }
 }

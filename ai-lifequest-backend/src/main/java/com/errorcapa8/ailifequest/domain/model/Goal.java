@@ -66,6 +66,27 @@ public class Goal {
         recalculateProgress();
     }
 
+    public void updateDetails(String title, String description, String category, LocalDate targetDate) {
+        if (title != null) {
+            if (title.isBlank()) {
+                throw new IllegalArgumentException("El titulo de la meta no puede estar vacio");
+            }
+            this.title = title.trim();
+        }
+        if (description != null) {
+            this.description = description;
+        }
+        if (category != null) {
+            if (category.isBlank()) {
+                throw new IllegalArgumentException("La categoria de la meta no puede estar vacia");
+            }
+            this.category = category.trim();
+        }
+        if (targetDate != null) {
+            this.targetDate = targetDate;
+        }
+    }
+
     public void recalculateProgress() {
         long completed = challenges.stream()
                 .filter(Challenge::isCompleted)
