@@ -60,4 +60,6 @@ public class UserEntity {
     public void setTotalXp(int totalXp) { this.totalXp = totalXp; }
     public UserStatus getStatus() { return status; }
     public void setStatus(UserStatus status) { this.status = status; }
+    public LocalDateTime getDeactivatedAt() { return deactivatedAt; }
+    public void setDeactivatedAt(LocalDateTime deactivatedAt) { this.deactivatedAt = deactivatedAt; }
 }
