@@ -82,43 +82,29 @@ Antes de ejecutar el proyecto necesitas tener instalado:
 - Java 17
 - Maven
 - Node.js y npm
-- PostgreSQL
+- Docker Desktop o Docker Engine con Docker Compose
 
-La base de datos esperada se llama:
+PostgreSQL se levanta con Docker para que todo el equipo use la misma configuracion local. La guia detallada de base de datos esta en `ai-lifequest-backend/README.md`.
 
-```text
-lifequest_db
-```
+## Preparar La Base De Datos
 
-Y la configuración local por defecto usa:
-
-```text
-usuario: postgres
-contraseña: postgres
-puerto: 5432
-```
-
-## Preparar PostgreSQL
-
-En Linux puedes crear la base así:
+Desde la raiz del repositorio:
 
 ```bash
-sudo -u postgres psql
-CREATE DATABASE lifequest_db;
-ALTER USER postgres WITH PASSWORD 'postgres';
-\q
+docker compose up -d postgres
 ```
-
-También hay guías más detalladas dentro del backend:
-
-- `ai-lifequest-backend/POSTGRES_SETUP.md`
-- `ai-lifequest-backend/POSTGRES_SETUP_WINDOWS.md`
 
 ## Ejecutar El Proyecto
 
 Lo más cómodo es usar dos consolas: una para el backend y otra para el frontend.
 
-### 1. Backend
+### 1. Base De Datos
+
+```bash
+docker compose up -d postgres
+```
+
+### 2. Backend
 
 ```bash
 cd ai-lifequest-backend
@@ -131,7 +117,7 @@ El backend queda disponible en:
 http://localhost:8080
 ```
 
-### 2. Frontend
+### 3. Frontend
 
 ```bash
 cd ai-lifequest-frontend
