@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "d7b6612b-b2cf-41fa-9ef6-46ec783132e2",
-    "name": "AI LifeQuest Sprint 1",
-    "description": "Coleccion para probar el flujo Sprint 1: registro/login, usuario, metas, retos y completar reto.",
+    "name": "AI LifeQuest API Local",
+    "description": "Coleccion para probar el flujo local de AI LifeQuest: auth, usuarios, metas, retos, edicion, desactivacion y reglas de usuario inactivo.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -21,10 +21,12 @@
                   "  pm.response.to.have.status(201);",
                   "});",
                   "const json = pm.response.json();",
-                  "pm.test('Register response has userId', function () {",
+                  "pm.test('Register response has userId and email', function () {",
                   "  pm.expect(json.userId).to.be.a('string');",
+                  "  pm.expect(json.email).to.be.a('string');",
                   "});",
-                  "pm.environment.set('userId', json.userId);"
+                  "pm.environment.set('userId', json.userId);",
+                  "pm.environment.set('email', json.email);"
                 ]
               }
             }
@@ -37,17 +39,28 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/auth/register",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
-            },
-            "url": "{{baseUrl}}/api/auth/register"
+              "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"test.user+{{$timestamp}}@example.com\",\n  \"password\": \"{{password}}\"\n}"
+            }
           },
           "response": []
         },
         {
           "name": "Login user",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('email')) {",
+                  "  throw new Error('Falta email. Ejecuta primero Register user.');",
+                  "}"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -73,17 +86,28 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/auth/login",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
-            },
-            "url": "{{baseUrl}}/api/auth/login"
+            }
           },
           "response": []
         },
         {
           "name": "Login with invalid password",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('email')) {",
+                  "  throw new Error('Falta email. Ejecuta primero Register user.');",
+                  "}"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -104,11 +128,11 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/auth/login",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"wrong-password\"\n}"
-            },
-            "url": "{{baseUrl}}/api/auth/login"
+            }
           },
           "response": []
         }
@@ -139,8 +163,97 @@
                   "pm.test('Get user returns 200', function () {",
                   "  pm.response.to.have.status(200);",
                   "});",
-                  "pm.test('User has totalXp', function () {",
-                  "  pm.expect(pm.response.json().totalXp).to.be.a('number');",
+                  "const json = pm.response.json();",
+                  "pm.test('User has totalXp and is active', function () {",
+                  "  pm.expect(json.totalXp).to.be.a('number');",
+                  "  pm.expect(json.status).to.eql('ACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?userId={{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('userId')) {",
+                  "  throw new Error('Falta userId. Ejecuta primero Register user o Login user.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Update user returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('User editable fields were updated', function () {",
+                  "  pm.expect(json.name).to.eql(pm.environment.get('updatedName'));",
+                  "  pm.expect(json.email).to.include('updated.user+');",
+                  "});",
+                  "pm.environment.set('email', json.email);",
+                  "pm.environment.set('updatedEmail', json.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{updatedName}}\",\n  \"email\": \"updated.user+{{$timestamp}}@example.com\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get updated user by id",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('userId')) {",
+                  "  throw new Error('Falta userId. Ejecuta primero Register user o Login user.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Get updated user returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Updated user persists changes', function () {",
+                  "  pm.expect(json.name).to.eql(pm.environment.get('updatedName'));",
+                  "  pm.expect(json.email).to.eql(pm.environment.get('updatedEmail'));",
                   "});"
                 ]
               }
@@ -197,11 +310,60 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/goals",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"title\": \"Aprender Spring Boot\",\n  \"description\": \"Completar el flujo backend del Sprint 1\",\n  \"category\": \"Backend\",\n  \"targetDate\": \"2026-12-31\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update goal",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('goalId')) {",
+                  "  throw new Error('Falta goalId. Ejecuta primero Create goal.');",
+                  "}"
+                ]
+              }
             },
-            "url": "{{baseUrl}}/api/goals"
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Update goal returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Goal editable fields were updated', function () {",
+                  "  pm.expect(json.title).to.eql(pm.environment.get('updatedGoalTitle'));",
+                  "  pm.expect(json.description).to.eql('Meta editada desde Postman');",
+                  "  pm.expect(json.category).to.eql('Arquitectura');",
+                  "  pm.expect(json.targetDate).to.eql('2027-01-31');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/goals/{{goalId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"title\": \"{{updatedGoalTitle}}\",\n  \"description\": \"Meta editada desde Postman\",\n  \"category\": \"Arquitectura\",\n  \"targetDate\": \"2027-01-31\"\n}"
+            }
           },
           "response": []
         },
@@ -227,8 +389,10 @@
                   "pm.test('List goals returns 200', function () {",
                   "  pm.response.to.have.status(200);",
                   "});",
-                  "pm.test('Goals response is an array', function () {",
-                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "pm.test('Goals response is an array with current goal', function () {",
+                  "  const goals = pm.response.json();",
+                  "  pm.expect(goals).to.be.an('array');",
+                  "  pm.expect(goals.some(goal => goal.goalId === pm.environment.get('goalId'))).to.eql(true);",
                   "});"
                 ]
               }
@@ -285,11 +449,59 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/challenges",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goalId\": \"{{goalId}}\",\n  \"title\": \"Crear entidades JPA\",\n  \"description\": \"Implementar entidades y repositorios para persistencia\",\n  \"xpReward\": 25\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update challenge",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('challengeId')) {",
+                  "  throw new Error('Falta challengeId. Ejecuta primero Create challenge.');",
+                  "}"
+                ]
+              }
             },
-            "url": "{{baseUrl}}/api/challenges"
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Update challenge returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Challenge editable fields were updated', function () {",
+                  "  pm.expect(json.title).to.eql(pm.environment.get('updatedChallengeTitle'));",
+                  "  pm.expect(json.description).to.eql('Reto editado desde Postman');",
+                  "  pm.expect(json.xpReward).to.eql(25);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/challenges/{{challengeId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{goalId}}\",\n  \"title\": \"{{updatedChallengeTitle}}\",\n  \"description\": \"Reto editado desde Postman\",\n  \"xpReward\": 25\n}"
+            }
           },
           "response": []
         },
@@ -327,11 +539,11 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/challenges",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goalId\": \"{{goalId}}\",\n  \"title\": \"Exponer endpoints REST\",\n  \"description\": \"Implementar controladores y DTOs\",\n  \"xpReward\": 30\n}"
-            },
-            "url": "{{baseUrl}}/api/challenges"
+            }
           },
           "response": []
         },
@@ -357,8 +569,10 @@
                   "pm.test('List challenges returns 200', function () {",
                   "  pm.response.to.have.status(200);",
                   "});",
-                  "pm.test('Challenges response is an array', function () {",
-                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "pm.test('Challenges response is an array with current challenge', function () {",
+                  "  const challenges = pm.response.json();",
+                  "  pm.expect(challenges).to.be.an('array');",
+                  "  pm.expect(challenges.some(challenge => challenge.challengeId === pm.environment.get('challengeId'))).to.eql(true);",
                   "});"
                 ]
               }
@@ -413,11 +627,11 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/challenges/complete",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"challengeId\": \"{{challengeId}}\"\n}"
-            },
-            "url": "{{baseUrl}}/api/challenges/complete"
+            }
           },
           "response": []
         },
@@ -455,11 +669,252 @@
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/challenges/complete",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"challengeId\": \"{{challengeId}}\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Inactive Users",
+      "item": [
+        {
+          "name": "Register inactive scenario user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Register inactive scenario user returns 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('inactiveUserId', json.userId);",
+                  "pm.environment.set('inactiveEmail', json.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Inactive Scenario User\",\n  \"email\": \"inactive.user+{{$timestamp}}@example.com\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create goal before deactivation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('inactiveUserId')) {",
+                  "  throw new Error('Falta inactiveUserId. Ejecuta primero Register inactive scenario user.');",
+                  "}"
+                ]
+              }
             },
-            "url": "{{baseUrl}}/api/challenges/complete"
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create inactive scenario goal returns 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('inactiveGoalId', json.goalId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/goals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{inactiveUserId}}\",\n  \"title\": \"Meta antes de desactivar\",\n  \"description\": \"Esta meta permite probar historial conservado\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2026-12-31\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('inactiveUserId')) {",
+                  "  throw new Error('Falta inactiveUserId. Ejecuta primero Register inactive scenario user.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deactivate user returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('User status is INACTIVE', function () {",
+                  "  pm.expect(pm.response.json().status).to.eql('INACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/{{inactiveUserId}}/deactivate"
+          },
+          "response": []
+        },
+        {
+          "name": "Get inactive user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('inactiveUserId')) {",
+                  "  throw new Error('Falta inactiveUserId. Ejecuta primero Register inactive scenario user.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Get inactive user returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Inactive user history is preserved', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.userId).to.eql(pm.environment.get('inactiveUserId'));",
+                  "  pm.expect(json.status).to.eql('INACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?userId={{inactiveUserId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Try create goal with inactive user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('inactiveUserId')) {",
+                  "  throw new Error('Falta inactiveUserId. Ejecuta primero Register inactive scenario user.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inactive user cannot create goals', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/goals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{inactiveUserId}}\",\n  \"title\": \"Meta bloqueada\",\n  \"description\": \"No debe crearse\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2026-12-31\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Try create challenge with inactive user goal",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('inactiveGoalId')) {",
+                  "  throw new Error('Falta inactiveGoalId. Ejecuta primero Create goal before deactivation.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inactive user cannot create challenges', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/challenges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{inactiveGoalId}}\",\n  \"title\": \"Reto bloqueado\",\n  \"description\": \"No debe crearse\",\n  \"xpReward\": 10\n}"
+            }
           },
           "response": []
         }
