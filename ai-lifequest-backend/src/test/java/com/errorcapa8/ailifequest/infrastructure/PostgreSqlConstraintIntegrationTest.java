@@ -103,6 +103,21 @@ class PostgreSqlConstraintIntegrationTest {
     }
 
     @Test
+    void postgresRejectsChallengeWithZeroXpReward() {
+        UserEntity user = persistUser("zero-xp-challenge-owner@example.com");
+        GoalEntity goal = goal(user.getId(), "Meta", GoalStatus.ACTIVE);
+        entityManager.persist(goal);
+        entityManager.flush();
+
+        ChallengeEntity challenge = challenge(goal.getId(), "Reto sin recompensa", ChallengeStatus.AVAILABLE);
+        challenge.setXpReward(0);
+        assertConstraint("ck_challenges_xp_reward_positive", () -> {
+            entityManager.persist(challenge);
+            entityManager.flush();
+        });
+    }
+
+    @Test
     void postgresRejectsDuplicateUserEmail() {
         persistUser("duplicate@example.com");
 

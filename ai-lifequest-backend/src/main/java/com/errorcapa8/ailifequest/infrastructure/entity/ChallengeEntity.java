@@ -15,11 +15,13 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Check(name = "ck_challenges_xp_reward_positive", constraints = "xp_reward >= 1")
 @Table(name = "challenges", indexes = {
         @Index(name = "idx_challenges_goal_id", columnList = "goal_id")
 }, uniqueConstraints = {

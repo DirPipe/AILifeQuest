@@ -10,6 +10,6 @@ public record UpdateChallengeRequestDTO(
         @NotNull UUID goalId,
         @Size(max = 100) String title,
         @Size(max = 200) String description,
-        @Min(0) Integer xpReward
+        @Min(1) Integer xpReward
 ) {
 }

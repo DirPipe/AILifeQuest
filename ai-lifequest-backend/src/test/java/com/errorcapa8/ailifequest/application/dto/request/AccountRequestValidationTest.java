@@ -49,11 +49,24 @@ class AccountRequestValidationTest {
     }
 
     @Test
-    void challengeCreationRequiresAnExplicitNonnegativeXpReward() {
-        assertThat(validator.validate(new CreateChallengeRequestDTO(java.util.UUID.randomUUID(), "Reto", null, 0))).isEmpty();
+    void challengeCreationRequiresAnExplicitPositiveXpReward() {
+        assertThat(validator.validate(new CreateChallengeRequestDTO(java.util.UUID.randomUUID(), "Reto", null, 1))).isEmpty();
         assertThat(validator.validate(new CreateChallengeRequestDTO(java.util.UUID.randomUUID(), "Reto", null, null)))
                 .anyMatch(violation -> violation.getPropertyPath().toString().equals("xpReward"));
+        assertThat(validator.validate(new CreateChallengeRequestDTO(java.util.UUID.randomUUID(), "Reto", null, 0)))
+                .anyMatch(violation -> violation.getPropertyPath().toString().equals("xpReward"));
         assertThat(validator.validate(new CreateChallengeRequestDTO(java.util.UUID.randomUUID(), "Reto", null, -1)))
+                .anyMatch(violation -> violation.getPropertyPath().toString().equals("xpReward"));
+    }
+
+    @Test
+    void challengeUpdateAllowsOmittedRewardButRequiresPositiveXpWhenProvided() {
+        java.util.UUID goalId = java.util.UUID.randomUUID();
+        assertThat(validator.validate(new UpdateChallengeRequestDTO(goalId, null, null, null))).isEmpty();
+        assertThat(validator.validate(new UpdateChallengeRequestDTO(goalId, null, null, 1))).isEmpty();
+        assertThat(validator.validate(new UpdateChallengeRequestDTO(goalId, null, null, 0)))
+                .anyMatch(violation -> violation.getPropertyPath().toString().equals("xpReward"));
+        assertThat(validator.validate(new UpdateChallengeRequestDTO(goalId, null, null, -1)))
                 .anyMatch(violation -> violation.getPropertyPath().toString().equals("xpReward"));
     }
 }

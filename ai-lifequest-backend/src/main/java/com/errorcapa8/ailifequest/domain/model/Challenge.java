@@ -43,11 +43,14 @@ public class Challenge {
         if (description != null && description.length() > MAX_DESCRIPTION_LENGTH) {
             throw new IllegalArgumentException("La descripcion del reto no puede superar 200 caracteres");
         }
+        if (xpReward == null || xpReward.value() < 1) {
+            throw new IllegalArgumentException("La recompensa XP del reto debe ser al menos 1");
+        }
         this.id = id;
         this.goalId = goalId;
         this.title = normalizedTitle;
         this.description = description;
-        this.xpReward = xpReward == null ? new XP(0) : xpReward;
+        this.xpReward = xpReward;
         this.status = status == null ? ChallengeStatus.AVAILABLE : status;
         this.completedAt = completedAt;
     }
@@ -65,6 +68,9 @@ public class Challenge {
     }
 
     public void updateDetails(String title, String description, Integer xpReward) {
+        if (xpReward != null && xpReward < 1) {
+            throw new IllegalArgumentException("La recompensa XP del reto debe ser al menos 1");
+        }
         if (title != null) {
             if (title.isBlank()) {
                 throw new IllegalArgumentException("El titulo del reto no puede estar vacio");

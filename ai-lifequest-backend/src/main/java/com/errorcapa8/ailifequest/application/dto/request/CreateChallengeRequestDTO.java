@@ -11,6 +11,6 @@ public record CreateChallengeRequestDTO(
         @NotNull UUID goalId,
         @NotBlank @Size(max = 100) String title,
         @Size(max = 200) String description,
-        @NotNull @Min(0) Integer xpReward
+        @NotNull @Min(1) Integer xpReward
 ) {
 }

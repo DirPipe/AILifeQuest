@@ -3,30 +3,31 @@ package com.errorcapa8.ailifequest.application.service;
 import com.errorcapa8.ailifequest.application.dto.request.CreateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.UpdateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.exception.ConflictException;
-import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.enums.GoalStatus;
+import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.Challenge;
 import com.errorcapa8.ailifequest.domain.model.Goal;
 import com.errorcapa8.ailifequest.domain.model.User;
+import com.errorcapa8.ailifequest.domain.model.XpTransaction;
 import com.errorcapa8.ailifequest.domain.repository.ChallengeRepository;
 import com.errorcapa8.ailifequest.domain.repository.GoalRepository;
 import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.repository.XpTransactionRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.ChallengeId;
 import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
-import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
-import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,7 +36,11 @@ class ChallengeServiceTest {
     private final InMemoryChallengeRepository challengeRepository = new InMemoryChallengeRepository();
     private final InMemoryGoalRepository goalRepository = new InMemoryGoalRepository();
     private final InMemoryUserRepository userRepository = new InMemoryUserRepository();
-    private final XpTransactionRepository xpTransactionRepository = transaction -> transaction;
+    private final List<XpTransaction> xpTransactions = new ArrayList<>();
+    private final XpTransactionRepository xpTransactionRepository = transaction -> {
+        xpTransactions.add(transaction);
+        return transaction;
+    };
     private final ChallengeService challengeService = new ChallengeService(challengeRepository, goalRepository, userRepository, xpTransactionRepository);
 
     @Test
@@ -60,6 +65,31 @@ class ChallengeServiceTest {
         assertThatThrownBy(() -> challengeService.createChallenge(new CreateChallengeRequestDTO(goalId, "Reto", null, null)))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("XP");
+    }
+
+    @Test
+    void completingMinimumRewardChallengeReleasesItsTitle() {
+        UUID userId = UUID.randomUUID();
+        UUID goalId = UUID.randomUUID();
+        UUID challengeId = UUID.randomUUID();
+        String title = "Reto mínimo XP";
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null,
+                "Salud", LocalDate.now().plusDays(7)));
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+        challengeRepository.save(new Challenge(new ChallengeId(challengeId), new GoalId(goalId),
+                title, null, new XP(1)));
+        challengeRepository.save(new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(goalId),
+                "Otro reto pendiente", null, new XP(1)));
+
+        var completion = challengeService.completeChallenge(challengeId);
+        var recreated = challengeService.createChallenge(new CreateChallengeRequestDTO(goalId, title, null, 1));
+
+        assertThat(completion.challenge().status()).isEqualTo("COMPLETED");
+        assertThat(completion.goal().status()).isEqualTo("ACTIVE");
+        assertThat(completion.xpEarned()).isEqualTo(1);
+        assertThat(xpTransactions).hasSize(1);
+        assertThat(xpTransactions.get(0).getAmount().value()).isEqualTo(1);
+        assertThat(recreated.status()).isEqualTo("AVAILABLE");
     }
 
     @Test

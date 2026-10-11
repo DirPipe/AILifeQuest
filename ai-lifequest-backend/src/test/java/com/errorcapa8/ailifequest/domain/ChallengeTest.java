@@ -77,4 +77,23 @@ class ChallengeTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("200");
     }
+
+    @Test
+    void rejectsZeroXpRewardWhenCreatingChallenge() {
+        assertThatThrownBy(() -> new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(UUID.randomUUID()),
+                "Reto", null, new XP(0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("al menos 1");
+    }
+
+    @Test
+    void rejectsZeroXpRewardWhenUpdatingChallenge() {
+        Challenge challenge = new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(UUID.randomUUID()),
+                "Reto", null, new XP(1));
+
+        assertThatThrownBy(() -> challenge.updateDetails(null, null, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("al menos 1");
+        assertThat(challenge.getXpReward().value()).isEqualTo(1);
+    }
 }
