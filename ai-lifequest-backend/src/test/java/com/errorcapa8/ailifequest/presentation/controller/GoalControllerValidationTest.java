@@ -47,6 +47,26 @@ class GoalControllerValidationTest {
     }
 
     @Test
+    void malformedTargetDateReturnsSafeBadRequestWithoutCallingService() throws Exception {
+        mockMvc.perform(post("/api/goals")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "userId": "b86cd5ed-8b0a-4db2-905e-676cf769cf81",
+                                  "title": "Aprender Spring Boot",
+                                  "description": "Completar el flujo backend del Sprint 1",
+                                  "category": "Backend",
+                                  "targetDate": "mañana"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("formato inválido")))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("JSON parse error"))));
+
+        org.assertj.core.api.Assertions.assertThat(goalService.wasCalled()).isFalse();
+    }
+
+    @Test
     void mapsDuplicateGoalToConflictResponse() throws Exception {
         goalService.failWith(new ConflictException("Ya existe una meta activa con ese título para este usuario."));
 
