@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Goal {
+    private static final int MAX_TITLE_LENGTH = 100;
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
+
     private final GoalId id;
     private final UserId userId;
     private String title;
@@ -36,12 +39,22 @@ public class Goal {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("El titulo de la meta no puede estar vacio");
         }
+        String normalizedTitle = title.trim();
+        if (normalizedTitle.length() > MAX_TITLE_LENGTH) {
+            throw new IllegalArgumentException("El titulo de la meta no puede superar 100 caracteres");
+        }
+        if (description != null && description.length() > MAX_DESCRIPTION_LENGTH) {
+            throw new IllegalArgumentException("La descripcion de la meta no puede superar 200 caracteres");
+        }
         if (category == null || category.isBlank()) {
             throw new IllegalArgumentException("La categoria de la meta no puede estar vacia");
         }
+        if (targetDate == null) {
+            throw new IllegalArgumentException("La fecha objetivo de la meta es obligatoria");
+        }
         this.id = id;
         this.userId = userId;
-        this.title = title;
+        this.title = normalizedTitle;
         this.description = description;
         this.category = category;
         this.targetDate = targetDate;
@@ -71,9 +84,16 @@ public class Goal {
             if (title.isBlank()) {
                 throw new IllegalArgumentException("El titulo de la meta no puede estar vacio");
             }
-            this.title = title.trim();
+            String normalizedTitle = title.trim();
+            if (normalizedTitle.length() > MAX_TITLE_LENGTH) {
+                throw new IllegalArgumentException("El titulo de la meta no puede superar 100 caracteres");
+            }
+            this.title = normalizedTitle;
         }
         if (description != null) {
+            if (description.length() > MAX_DESCRIPTION_LENGTH) {
+                throw new IllegalArgumentException("La descripcion de la meta no puede superar 200 caracteres");
+            }
             this.description = description;
         }
         if (category != null) {

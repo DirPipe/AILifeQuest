@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,7 +38,7 @@ class ChallengeServiceTest {
     void createChallengeRejectsInactiveUser() {
         UUID userId = UUID.randomUUID();
         UUID goalId = UUID.randomUUID();
-        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", null));
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
         userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com", new XP(0), UserStatus.INACTIVE));
 
         assertThatThrownBy(() -> challengeService.createChallenge(new CreateChallengeRequestDTO(goalId, "Reto", null, 10)))
@@ -50,7 +51,7 @@ class ChallengeServiceTest {
         UUID userId = UUID.randomUUID();
         UUID goalId = UUID.randomUUID();
         UUID challengeId = UUID.randomUUID();
-        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", null));
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
         challengeRepository.save(new Challenge(new ChallengeId(challengeId), new GoalId(goalId), "Reto", null, new XP(10)));
 
         var response = challengeService.updateChallenge(challengeId, new UpdateChallengeRequestDTO(goalId, "Reto editado", "Desc", 25));

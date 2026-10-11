@@ -43,7 +43,7 @@ class GoalServiceTest {
         UUID userId = UUID.randomUUID();
         UUID goalId = UUID.randomUUID();
         LocalDate targetDate = LocalDate.now().plusDays(10);
-        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", null));
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
 
         var response = goalService.updateGoal(goalId, new UpdateGoalRequestDTO(userId, "Meta editada", "Desc", "Estudio", targetDate));
 
@@ -58,7 +58,7 @@ class GoalServiceTest {
         UUID ownerId = UUID.randomUUID();
         UUID requesterId = UUID.randomUUID();
         UUID goalId = UUID.randomUUID();
-        goalRepository.save(new Goal(new GoalId(goalId), new UserId(ownerId), "Meta", null, "Salud", null));
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(ownerId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
 
         assertThatThrownBy(() -> goalService.updateGoal(goalId, new UpdateGoalRequestDTO(requesterId, "Meta editada", null, null, null)))
                 .isInstanceOf(DomainException.class)

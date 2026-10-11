@@ -14,12 +14,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GoalTest {
 
     @Test
     void recalculatesProgressFromChallenges() {
-        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", null);
+        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", LocalDate.now().plusDays(7));
         Challenge first = new Challenge(new ChallengeId(UUID.randomUUID()), goal.getId(), "Clase 1", null, new XP(10));
         Challenge second = new Challenge(new ChallengeId(UUID.randomUUID()), goal.getId(), "Clase 2", null, new XP(10));
 
@@ -34,7 +35,7 @@ class GoalTest {
 
     @Test
     void completingAllChallengesCompletesGoal() {
-        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", null);
+        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", LocalDate.now().plusDays(7));
         Challenge challenge = new Challenge(new ChallengeId(UUID.randomUUID()), goal.getId(), "Clase 1", null, new XP(10));
 
         challenge.complete();
@@ -46,7 +47,7 @@ class GoalTest {
 
     @Test
     void updateDetailsChangesEditableFields() {
-        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", null);
+        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "Aprender Java", null, "Estudio", LocalDate.now().plusDays(7));
         LocalDate targetDate = LocalDate.now().plusDays(7);
 
         goal.updateDetails("  Aprender Spring  ", "Practicar APIs", "Backend", targetDate);
@@ -54,6 +55,39 @@ class GoalTest {
         assertThat(goal.getTitle()).isEqualTo("Aprender Spring");
         assertThat(goal.getDescription()).isEqualTo("Practicar APIs");
         assertThat(goal.getCategory()).isEqualTo("Backend");
+        assertThat(goal.getTargetDate()).isEqualTo(targetDate);
+    }
+
+    @Test
+    void rejectsMissingTargetDate() {
+        assertThatThrownBy(() -> new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "Meta", null, "Estudio", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("fecha objetivo");
+    }
+
+    @Test
+    void rejectsTitlesAndDescriptionsOverTheirLimits() {
+        LocalDate targetDate = LocalDate.now().plusDays(7);
+
+        assertThatThrownBy(() -> new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "t".repeat(101), null, "Estudio", targetDate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("100");
+        assertThatThrownBy(() -> new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "Meta", "d".repeat(201), "Estudio", targetDate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("200");
+    }
+
+    @Test
+    void updateWithOmittedTargetDateKeepsExistingDate() {
+        LocalDate targetDate = LocalDate.now().plusDays(7);
+        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "Meta", null, "Estudio", targetDate);
+
+        goal.updateDetails("Meta editada", null, null, null);
+
         assertThat(goal.getTargetDate()).isEqualTo(targetDate);
     }
 }

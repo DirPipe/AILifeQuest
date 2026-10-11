@@ -30,13 +30,13 @@ public class GoalEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
     private UserEntity user;
-    @Column(nullable = false, length = 160)
+    @Column(nullable = false, length = 100)
     private String title;
-    @Column(columnDefinition = "text")
+    @Column(length = 200)
     private String description;
     @Column(nullable = false, length = 80)
     private String category;
-    @Column(name = "target_date")
+    @Column(name = "target_date", nullable = false)
     private LocalDate targetDate;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
