@@ -9,18 +9,21 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+})
 public class UserEntity {
     @Id
     private UUID id;
     @Column(nullable = false, length = 120)
     private String name;
-    @Column(nullable = false, unique = true, length = 180)
+    @Column(nullable = false, length = 180)
     private String email;
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;

@@ -2,14 +2,15 @@ package com.errorcapa8.ailifequest.application.service;
 
 import com.errorcapa8.ailifequest.application.dto.request.UpdateUserRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.UserResponseDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.application.exception.NotFoundException;
-import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.User;
 import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -33,9 +34,9 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
 
-        String normalizedEmail = request.email() == null ? null : request.email().trim().toLowerCase();
+        String normalizedEmail = request.email() == null ? null : request.email().trim().toLowerCase(Locale.ROOT);
         if (normalizedEmail != null && !normalizedEmail.equals(user.getEmail()) && userRepository.existsByEmail(normalizedEmail)) {
-            throw new DomainException("El email ya se encuentra registrado.");
+            throw new ConflictException("El email ya se encuentra registrado.");
         }
 
         user.updateProfile(request.name(), normalizedEmail);

@@ -13,6 +13,7 @@ import java.util.List;
 public class Goal {
     private static final int MAX_TITLE_LENGTH = 100;
     private static final int MAX_DESCRIPTION_LENGTH = 200;
+    private static final int MAX_CATEGORY_LENGTH = 80;
 
     private final GoalId id;
     private final UserId userId;
@@ -49,6 +50,10 @@ public class Goal {
         if (category == null || category.isBlank()) {
             throw new IllegalArgumentException("La categoria de la meta no puede estar vacia");
         }
+        String normalizedCategory = category.trim();
+        if (normalizedCategory.length() > MAX_CATEGORY_LENGTH) {
+            throw new IllegalArgumentException("La categoria de la meta no puede superar 80 caracteres");
+        }
         if (targetDate == null) {
             throw new IllegalArgumentException("La fecha objetivo de la meta es obligatoria");
         }
@@ -56,7 +61,7 @@ public class Goal {
         this.userId = userId;
         this.title = normalizedTitle;
         this.description = description;
-        this.category = category;
+        this.category = normalizedCategory;
         this.targetDate = targetDate;
         this.progress = progress == null ? new Progress(0.0) : progress;
         this.status = status == null ? GoalStatus.ACTIVE : status;
@@ -100,7 +105,11 @@ public class Goal {
             if (category.isBlank()) {
                 throw new IllegalArgumentException("La categoria de la meta no puede estar vacia");
             }
-            this.category = category.trim();
+            String normalizedCategory = category.trim();
+            if (normalizedCategory.length() > MAX_CATEGORY_LENGTH) {
+                throw new IllegalArgumentException("La categoria de la meta no puede superar 80 caracteres");
+            }
+            this.category = normalizedCategory;
         }
         if (targetDate != null) {
             this.targetDate = targetDate;

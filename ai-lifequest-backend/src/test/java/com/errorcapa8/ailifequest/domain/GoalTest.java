@@ -81,6 +81,24 @@ class GoalTest {
     }
 
     @Test
+    void categoryIsLimitedToEightyCharactersOnCreateAndUpdate() {
+        Goal boundaryGoal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "Meta", null, "c".repeat(80), LocalDate.now().plusDays(7));
+        Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "Meta", null, "Estudio", LocalDate.now().plusDays(7));
+
+        assertThat(boundaryGoal.getCategory()).hasSize(80);
+        assertThatThrownBy(() -> new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),
+                "Meta", null, "c".repeat(81), LocalDate.now().plusDays(7)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("80");
+        assertThatThrownBy(() -> goal.updateDetails(null, null, "c".repeat(81), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("80");
+        assertThat(goal.getCategory()).isEqualTo("Estudio");
+    }
+
+    @Test
     void updateWithOmittedTargetDateKeepsExistingDate() {
         LocalDate targetDate = LocalDate.now().plusDays(7);
         Goal goal = new Goal(new GoalId(UUID.randomUUID()), new UserId(UUID.randomUUID()),

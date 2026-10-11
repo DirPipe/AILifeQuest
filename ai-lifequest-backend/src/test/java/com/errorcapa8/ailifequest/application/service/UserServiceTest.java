@@ -1,9 +1,9 @@
 package com.errorcapa8.ailifequest.application.service;
 
 import com.errorcapa8.ailifequest.application.dto.request.UpdateUserRequestDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.application.exception.NotFoundException;
 import com.errorcapa8.ailifequest.domain.enums.UserStatus;
-import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.User;
 import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
@@ -39,7 +39,7 @@ class UserServiceTest {
         userRepository.save(new User(new UserId(UUID.randomUUID()), "Luis", "used@example.com"));
 
         assertThatThrownBy(() -> userService.updateUser(userId, new UpdateUserRequestDTO(null, "used@example.com")))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("email");
     }
 

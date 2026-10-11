@@ -51,6 +51,18 @@ class ChallengeServiceTest {
     }
 
     @Test
+    void createChallengeRejectsMissingXpRewardInsteadOfTreatingItAsZero() {
+        UUID userId = UUID.randomUUID();
+        UUID goalId = UUID.randomUUID();
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+
+        assertThatThrownBy(() -> challengeService.createChallenge(new CreateChallengeRequestDTO(goalId, "Reto", null, null)))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("XP");
+    }
+
+    @Test
     void updateChallengeChangesEditableFieldsWhenItBelongsToGoal() {
         UUID userId = UUID.randomUUID();
         UUID goalId = UUID.randomUUID();

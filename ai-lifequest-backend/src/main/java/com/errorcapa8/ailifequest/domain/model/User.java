@@ -4,7 +4,12 @@ import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 
+import java.util.Locale;
+
 public class User {
+    private static final int MAX_NAME_LENGTH = 120;
+    private static final int MAX_EMAIL_LENGTH = 180;
+
     private final UserId id;
     private String name;
     private String email;
@@ -22,12 +27,20 @@ public class User {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("El nombre del usuario no puede estar vacio");
         }
+        String normalizedName = name.trim();
+        if (normalizedName.length() > MAX_NAME_LENGTH) {
+            throw new IllegalArgumentException("El nombre del usuario no puede superar 120 caracteres");
+        }
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("El email del usuario no puede estar vacio");
         }
+        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+        if (normalizedEmail.length() > MAX_EMAIL_LENGTH) {
+            throw new IllegalArgumentException("El email del usuario no puede superar 180 caracteres");
+        }
         this.id = id;
-        this.name = name;
-        this.email = email;
+        this.name = normalizedName;
+        this.email = normalizedEmail;
         this.totalXp = totalXp == null ? new XP(0) : totalXp;
         this.status = status == null ? UserStatus.ACTIVE : status;
     }
@@ -43,13 +56,21 @@ public class User {
             if (name.isBlank()) {
                 throw new IllegalArgumentException("El nombre del usuario no puede estar vacio");
             }
-            this.name = name.trim();
+            String normalizedName = name.trim();
+            if (normalizedName.length() > MAX_NAME_LENGTH) {
+                throw new IllegalArgumentException("El nombre del usuario no puede superar 120 caracteres");
+            }
+            this.name = normalizedName;
         }
         if (email != null) {
             if (email.isBlank()) {
                 throw new IllegalArgumentException("El email del usuario no puede estar vacio");
             }
-            this.email = email.trim().toLowerCase();
+            String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+            if (normalizedEmail.length() > MAX_EMAIL_LENGTH) {
+                throw new IllegalArgumentException("El email del usuario no puede superar 180 caracteres");
+            }
+            this.email = normalizedEmail;
         }
     }
 

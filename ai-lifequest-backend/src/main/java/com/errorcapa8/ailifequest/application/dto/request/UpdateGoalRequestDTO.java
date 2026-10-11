@@ -10,7 +10,7 @@ public record UpdateGoalRequestDTO(
         @NotNull UUID userId,
         @Size(max = 100) String title,
         @Size(max = 200) String description,
-        String category,
+        @Size(max = 80) String category,
         LocalDate targetDate
 ) {
 }

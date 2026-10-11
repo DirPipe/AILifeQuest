@@ -3,8 +3,8 @@ package com.errorcapa8.ailifequest.application.service;
 import com.errorcapa8.ailifequest.application.dto.request.LoginRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.RegisterRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.AuthResponseDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.application.exception.UnauthorizedException;
-import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.User;
 import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
@@ -12,6 +12,7 @@ import com.errorcapa8.ailifequest.infrastructure.repositoryimpl.UserCredentialsR
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -30,9 +31,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO request) {
-        String normalizedEmail = request.email().trim().toLowerCase();
+        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new DomainException("El email ya se encuentra registrado.");
+            throw new ConflictException("El email ya se encuentra registrado.");
         }
         User user = new User(new UserId(UUID.randomUUID()), request.name().trim(), normalizedEmail);
         User saved = userCredentialsRepository.saveNewUser(user, passwordHasher.hash(request.password()));
@@ -41,7 +42,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponseDTO login(LoginRequestDTO request) {
-        String normalizedEmail = request.email().trim().toLowerCase();
+        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new UnauthorizedException("Credenciales incorrectas."));
         String passwordHash = userCredentialsRepository.findPasswordHashByEmail(normalizedEmail)

@@ -47,4 +47,32 @@ class UserTest {
 
         assertThat(user.getStatus()).isEqualTo(UserStatus.INACTIVE);
     }
+
+    @Test
+    void nameAndEmailRespectDatabaseLimitsAndNormalizeEmail() {
+        User boundaryUser = new User(new UserId(UUID.randomUUID()), "n".repeat(120), "A@EXAMPLE.COM");
+
+        assertThat(boundaryUser.getName()).hasSize(120);
+        assertThat(boundaryUser.getEmail()).isEqualTo("a@example.com");
+        assertThatThrownBy(() -> new User(new UserId(UUID.randomUUID()), "n".repeat(121), "a@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("120");
+        assertThatThrownBy(() -> new User(new UserId(UUID.randomUUID()), "Ana", "a".repeat(169) + "@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("180");
+    }
+
+    @Test
+    void profileUpdateRejectsValuesThatExceedDatabaseLimits() {
+        User user = new User(new UserId(UUID.randomUUID()), "Ana", "ana@example.com");
+
+        assertThatThrownBy(() -> user.updateProfile("n".repeat(121), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("120");
+        assertThatThrownBy(() -> user.updateProfile(null, "a".repeat(169) + "@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("180");
+        assertThat(user.getName()).isEqualTo("Ana");
+        assertThat(user.getEmail()).isEqualTo("ana@example.com");
+    }
 }

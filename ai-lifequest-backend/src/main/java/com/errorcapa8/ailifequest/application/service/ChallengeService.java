@@ -53,6 +53,9 @@ public class ChallengeService {
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new DomainException("Un usuario inactivo no puede crear nuevos retos.");
         }
+        if (request.xpReward() == null) {
+            throw new DomainException("La recompensa de XP es obligatoria.");
+        }
         Challenge challenge = new Challenge(new ChallengeId(UUID.randomUUID()), goalId, request.title(), request.description(), new XP(request.xpReward()));
         if (challengeRepository.existsPendingTitle(goalId, TitleNormalizer.normalize(challenge.getTitle()), null)) {
             throw new ConflictException("Ya existe un reto pendiente con ese título para esta meta.");

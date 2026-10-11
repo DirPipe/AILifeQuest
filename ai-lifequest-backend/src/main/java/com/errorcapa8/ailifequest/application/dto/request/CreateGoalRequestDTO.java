@@ -11,7 +11,7 @@ public record CreateGoalRequestDTO(
         @NotNull UUID userId,
         @NotBlank @Size(max = 100) String title,
         @Size(max = 200) String description,
-        @NotBlank String category,
+        @NotBlank @Size(max = 80) String category,
         @NotNull LocalDate targetDate
 ) {
 }
