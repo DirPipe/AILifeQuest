@@ -922,7 +922,7 @@
     },
     {
       "name": "Validaciones backend",
-      "description": "Casos autónomos para límites, campos obligatorios, duplicados normalizados y contratos de error 400/409. Genera usuarios y datos propios; los registros quedan en la base de datos al no existir un endpoint de borrado.",
+      "description": "Casos autónomos para límites, campos obligatorios, duplicados normalizados y contratos de error 400/409. Genera usuarios y datos propios; los registros quedan en la base de datos al no existir un endpoint de borrado. Rechaza recompensas XP menores que 1.",
       "event": [
         {
           "listen": "prerequest",
@@ -2359,14 +2359,14 @@
           "response": []
         },
         {
-          "name": "36 Create challenge at exact limits with zero XP",
+          "name": "36 Create challenge at exact limits with minimum XP",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Reto con título 100, descripción 200 y cero XP devuelve 201', function () {",
+                  "pm.test('Reto con título 100, descripción 200 y 1 XP devuelve 201', function () {",
                   "  pm.response.to.have.status(201);",
                   "});",
                   "const json = pm.response.json();",
@@ -2374,7 +2374,7 @@
                   "  pm.expect(json.challengeId).to.be.a('string');",
                   "  pm.expect(json.title.length).to.eql(100);",
                   "  pm.expect(json.description.length).to.eql(200);",
-                  "  pm.expect(json.xpReward).to.eql(0);",
+                  "  pm.expect(json.xpReward).to.eql(1);",
                   "});",
                   "pm.collectionVariables.set('validationBoundaryChallengeId', json.challengeId);"
                 ]
@@ -2391,28 +2391,28 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"{{validationChallengeBoundaryDescription}}\",\n  \"xpReward\": 0\n}"
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"{{validationChallengeBoundaryDescription}}\",\n  \"xpReward\": 1\n}"
             },
             "url": "{{baseUrl}}/api/challenges"
           },
           "response": []
         },
         {
-          "name": "37 Update challenge at exact limits",
+          "name": "37 Update challenge at exact limits and minimum XP",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Actualización de reto acepta límites máximos y cero XP', function () {",
+                  "pm.test('Actualización de reto acepta límites máximos y recompensa mínima', function () {",
                   "  pm.response.to.have.status(200);",
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('La respuesta cumple el contrato esperado', function () {",
                   "  pm.expect(json.title.length).to.eql(100);",
                   "  pm.expect(json.description.length).to.eql(200);",
-                  "  pm.expect(json.xpReward).to.eql(0);",
+                  "  pm.expect(json.xpReward).to.eql(1);",
                   "});"
                 ]
               }
@@ -2428,7 +2428,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"{{validationChallengeBoundaryDescription}}\",\n  \"xpReward\": 0\n}"
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"{{validationChallengeBoundaryDescription}}\",\n  \"xpReward\": 1\n}"
             },
             "url": "{{baseUrl}}/api/challenges/{{validationBoundaryChallengeId}}"
           },
@@ -2964,6 +2964,9 @@
                   "const json = pm.response.json();",
                   "pm.test('La respuesta cumple el contrato esperado', function () {",
                   "  pm.expect(json.challengeId).to.be.a('string');",
+                  "});",
+                  "pm.test('La recompensa mínima queda guardada', function () {",
+                  "  pm.expect(json.xpReward).to.eql(1);",
                   "});"
                 ]
               }
@@ -2979,9 +2982,91 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"El título se libera al completar el reto previo\",\n  \"xpReward\": 0\n}"
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"El título se libera al completar el reto previo\",\n  \"xpReward\": 1\n}"
             },
             "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "52 Reject challenge creation with zero XP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Creación de reto con cero XP: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Creación de reto con cero XP: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Creación de reto con cero XP: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"Reto recompensa cero QA\",\n  \"description\": \"La recompensa debe ser al menos un punto XP\",\n  \"xpReward\": 0\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "53 Reject challenge update with zero XP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de reto con cero XP: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Actualización de reto con cero XP: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Actualización de reto con cero XP: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"xpReward\": 0\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/{{validationUpdateChallengeId}}"
           },
           "response": []
         }
