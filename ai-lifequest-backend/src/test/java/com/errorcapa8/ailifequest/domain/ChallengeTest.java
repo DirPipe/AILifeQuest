@@ -63,4 +63,18 @@ class ChallengeTest {
         assertThat(challenge.getDescription()).isEqualTo("Escribir resumen");
         assertThat(challenge.getXpReward().value()).isEqualTo(25);
     }
+
+    @Test
+    void rejectsTitleAndDescriptionOverConfiguredLimits() {
+        GoalId goalId = new GoalId(UUID.randomUUID());
+
+        assertThatThrownBy(() -> new Challenge(new ChallengeId(UUID.randomUUID()), goalId,
+                "t".repeat(101), null, new XP(10)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("100");
+        assertThatThrownBy(() -> new Challenge(new ChallengeId(UUID.randomUUID()), goalId,
+                "Reto", "d".repeat(201), new XP(10)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("200");
+    }
 }

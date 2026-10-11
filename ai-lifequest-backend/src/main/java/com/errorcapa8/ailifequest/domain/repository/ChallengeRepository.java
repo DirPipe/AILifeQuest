@@ -13,4 +13,6 @@ public interface ChallengeRepository {
     Optional<Challenge> findById(ChallengeId id);
 
     List<Challenge> findByGoalId(GoalId goalId);
+
+    boolean existsPendingTitle(GoalId goalId, String normalizedTitle, ChallengeId excludingChallengeId);
 }

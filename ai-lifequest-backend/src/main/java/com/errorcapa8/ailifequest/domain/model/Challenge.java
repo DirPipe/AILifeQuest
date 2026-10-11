@@ -10,6 +10,9 @@ import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import java.time.LocalDateTime;
 
 public class Challenge {
+    private static final int MAX_TITLE_LENGTH = 100;
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
+
     private final ChallengeId id;
     private final GoalId goalId;
     private String title;
@@ -33,9 +36,16 @@ public class Challenge {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("El titulo del reto no puede estar vacio");
         }
+        String normalizedTitle = title.trim();
+        if (normalizedTitle.length() > MAX_TITLE_LENGTH) {
+            throw new IllegalArgumentException("El titulo del reto no puede superar 100 caracteres");
+        }
+        if (description != null && description.length() > MAX_DESCRIPTION_LENGTH) {
+            throw new IllegalArgumentException("La descripcion del reto no puede superar 200 caracteres");
+        }
         this.id = id;
         this.goalId = goalId;
-        this.title = title;
+        this.title = normalizedTitle;
         this.description = description;
         this.xpReward = xpReward == null ? new XP(0) : xpReward;
         this.status = status == null ? ChallengeStatus.AVAILABLE : status;
@@ -59,9 +69,16 @@ public class Challenge {
             if (title.isBlank()) {
                 throw new IllegalArgumentException("El titulo del reto no puede estar vacio");
             }
-            this.title = title.trim();
+            String normalizedTitle = title.trim();
+            if (normalizedTitle.length() > MAX_TITLE_LENGTH) {
+                throw new IllegalArgumentException("El titulo del reto no puede superar 100 caracteres");
+            }
+            this.title = normalizedTitle;
         }
         if (description != null) {
+            if (description.length() > MAX_DESCRIPTION_LENGTH) {
+                throw new IllegalArgumentException("La descripcion del reto no puede superar 200 caracteres");
+            }
             this.description = description;
         }
         if (xpReward != null) {

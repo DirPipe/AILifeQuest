@@ -2,6 +2,7 @@ package com.errorcapa8.ailifequest.application.service;
 
 import com.errorcapa8.ailifequest.application.dto.request.CreateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.UpdateChallengeRequestDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.enums.GoalStatus;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
@@ -15,6 +16,7 @@ import com.errorcapa8.ailifequest.domain.repository.XpTransactionRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.ChallengeId;
 import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,73 @@ class ChallengeServiceTest {
                 .hasMessageContaining("no pertenece");
     }
 
+    @Test
+    void createChallengeRejectsSamePendingTitleIgnoringCaseAndWhitespace() {
+        UUID userId = UUID.randomUUID();
+        UUID goalId = UUID.randomUUID();
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+        challengeRepository.save(new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(goalId),
+                "Leer libro", null, new XP(10)));
+
+        assertThatThrownBy(() -> challengeService.createChallenge(new CreateChallengeRequestDTO(
+                goalId, " LEER   LIBRO ", null, 25)))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("reto pendiente");
+    }
+
+    @Test
+    void samePendingChallengeTitleIsAllowedForAnotherGoal() {
+        UUID userId = UUID.randomUUID();
+        UUID firstGoalId = UUID.randomUUID();
+        UUID secondGoalId = UUID.randomUUID();
+        goalRepository.save(new Goal(new GoalId(firstGoalId), new UserId(userId), "Meta 1", null, "Salud", LocalDate.now().plusDays(7)));
+        goalRepository.save(new Goal(new GoalId(secondGoalId), new UserId(userId), "Meta 2", null, "Salud", LocalDate.now().plusDays(14)));
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+        challengeRepository.save(new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(firstGoalId),
+                "Leer libro", null, new XP(10)));
+
+        var created = challengeService.createChallenge(new CreateChallengeRequestDTO(
+                secondGoalId, "Leer libro", null, 25));
+
+        assertThat(created.title()).isEqualTo("Leer libro");
+    }
+
+    @Test
+    void completedChallengeDoesNotReserveItsTitle() {
+        UUID userId = UUID.randomUUID();
+        UUID goalId = UUID.randomUUID();
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+        Challenge completed = new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(goalId),
+                "Leer libro", null, new XP(10));
+        completed.complete();
+        challengeRepository.save(completed);
+
+        var created = challengeService.createChallenge(new CreateChallengeRequestDTO(
+                goalId, "Leer libro", null, 25));
+
+        assertThat(created.status()).isEqualTo("AVAILABLE");
+    }
+
+    @Test
+    void updateChallengeRejectsAnotherPendingChallengesTitle() {
+        UUID userId = UUID.randomUUID();
+        UUID goalId = UUID.randomUUID();
+        UUID firstChallengeId = UUID.randomUUID();
+        goalRepository.save(new Goal(new GoalId(goalId), new UserId(userId), "Meta", null, "Salud", LocalDate.now().plusDays(7)));
+        challengeRepository.save(new Challenge(new ChallengeId(firstChallengeId), new GoalId(goalId),
+                "Reto 1", null, new XP(10)));
+        challengeRepository.save(new Challenge(new ChallengeId(UUID.randomUUID()), new GoalId(goalId),
+                "Reto 2", null, new XP(10)));
+
+        assertThatThrownBy(() -> challengeService.updateChallenge(firstChallengeId,
+                new UpdateChallengeRequestDTO(goalId, " reto   2 ", null, null)))
+                .isInstanceOf(ConflictException.class);
+        assertThat(challengeRepository.findById(new ChallengeId(firstChallengeId)).orElseThrow().getTitle())
+                .isEqualTo("Reto 1");
+    }
+
     private static final class InMemoryChallengeRepository implements ChallengeRepository {
         private final Map<ChallengeId, Challenge> challenges = new HashMap<>();
 
@@ -94,6 +163,15 @@ class ChallengeServiceTest {
             return challenges.values().stream()
                     .filter(challenge -> challenge.getGoalId().equals(goalId))
                     .toList();
+        }
+
+        @Override
+        public boolean existsPendingTitle(GoalId goalId, String normalizedTitle, ChallengeId excludingChallengeId) {
+            return challenges.values().stream()
+                    .filter(challenge -> challenge.getGoalId().equals(goalId))
+                    .filter(challenge -> !challenge.isCompleted())
+                    .filter(challenge -> excludingChallengeId == null || !challenge.getId().equals(excludingChallengeId))
+                    .anyMatch(challenge -> TitleNormalizer.normalize(challenge.getTitle()).equals(normalizedTitle));
         }
     }
 

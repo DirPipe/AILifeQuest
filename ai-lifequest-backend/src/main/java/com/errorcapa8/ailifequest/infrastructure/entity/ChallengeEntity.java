@@ -1,6 +1,7 @@
 package com.errorcapa8.ailifequest.infrastructure.entity;
 
 import com.errorcapa8.ailifequest.domain.enums.ChallengeStatus;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +22,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "challenges", indexes = {
         @Index(name = "idx_challenges_goal_id", columnList = "goal_id")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_challenges_goal_pending_title", columnNames = {"goal_id", "active_title_key"})
 })
 public class ChallengeEntity {
     @Id
@@ -29,9 +33,11 @@ public class ChallengeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goal_id", nullable = false, insertable = false, updatable = false)
     private GoalEntity goal;
-    @Column(nullable = false, length = 160)
+    @Column(nullable = false, length = 100)
     private String title;
-    @Column(columnDefinition = "text")
+    @Column(name = "active_title_key", length = 300)
+    private String activeTitleKey;
+    @Column(length = 200)
     private String description;
     @Column(name = "xp_reward", nullable = false)
     private int xpReward;
@@ -52,11 +58,17 @@ public class ChallengeEntity {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+        updateActiveTitleKey();
     }
 
     @PreUpdate
     void onUpdate() {
         updatedAt = LocalDateTime.now();
+        updateActiveTitleKey();
+    }
+
+    private void updateActiveTitleKey() {
+        activeTitleKey = status != ChallengeStatus.COMPLETED ? TitleNormalizer.normalize(title) : null;
     }
 
     public UUID getId() { return id; }

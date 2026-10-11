@@ -4,6 +4,7 @@ import com.errorcapa8.ailifequest.application.dto.request.CreateChallengeRequest
 import com.errorcapa8.ailifequest.application.dto.request.UpdateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.ChallengeResponseDTO;
 import com.errorcapa8.ailifequest.application.dto.response.GameProgressResponseDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.application.exception.NotFoundException;
 import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
@@ -17,6 +18,7 @@ import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.repository.XpTransactionRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.ChallengeId;
 import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,8 +54,11 @@ public class ChallengeService {
             throw new DomainException("Un usuario inactivo no puede crear nuevos retos.");
         }
         Challenge challenge = new Challenge(new ChallengeId(UUID.randomUUID()), goalId, request.title(), request.description(), new XP(request.xpReward()));
+        if (challengeRepository.existsPendingTitle(goalId, TitleNormalizer.normalize(challenge.getTitle()), null)) {
+            throw new ConflictException("Ya existe un reto pendiente con ese título para esta meta.");
+        }
+        goal.addChallenge(challenge);
         Challenge saved = challengeRepository.save(challenge);
-        goal.addChallenge(saved);
         goalRepository.save(goal);
         return DtoMapper.toChallengeResponse(saved);
     }
@@ -102,6 +107,10 @@ public class ChallengeService {
         }
         goalRepository.findById(goalId)
                 .orElseThrow(() -> new NotFoundException("Meta no encontrada."));
+        if (request.title() != null && !challenge.isCompleted()
+                && challengeRepository.existsPendingTitle(goalId, TitleNormalizer.normalize(request.title()), challenge.getId())) {
+            throw new ConflictException("Ya existe un reto pendiente con ese título para esta meta.");
+        }
         challenge.updateDetails(request.title(), request.description(), request.xpReward());
         return DtoMapper.toChallengeResponse(challengeRepository.save(challenge));
     }

@@ -38,4 +38,13 @@ public class ChallengeRepositoryImpl implements ChallengeRepository {
                 .map(ChallengeMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public boolean existsPendingTitle(GoalId goalId, String normalizedTitle, ChallengeId excludingChallengeId) {
+        if (excludingChallengeId == null) {
+            return springDataChallengeRepository.existsByGoalIdAndActiveTitleKey(goalId.value(), normalizedTitle);
+        }
+        return springDataChallengeRepository.existsByGoalIdAndActiveTitleKeyAndIdNot(
+                goalId.value(), normalizedTitle, excludingChallengeId.value());
+    }
 }

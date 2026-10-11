@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface SpringDataChallengeRepository extends JpaRepository<ChallengeEntity, UUID> {
     List<ChallengeEntity> findByGoalId(UUID goalId);
+
+    boolean existsByGoalIdAndActiveTitleKey(UUID goalId, String activeTitleKey);
+
+    boolean existsByGoalIdAndActiveTitleKeyAndIdNot(UUID goalId, String activeTitleKey, UUID excludingId);
 }
