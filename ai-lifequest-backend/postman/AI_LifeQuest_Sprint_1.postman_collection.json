@@ -919,6 +919,2073 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Validaciones backend",
+      "description": "Casos autónomos para límites, campos obligatorios, duplicados normalizados y contratos de error 400/409. Genera usuarios y datos propios; los registros quedan en la base de datos al no existir un endpoint de borrado.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.requestName === '01 Register user at exact limits') {",
+              "  const previousRunVariables = [",
+              "    'validationUserId', 'validationEmail', 'validationOtherEmail', 'validationOtherEmailSaved',",
+              "    'validationOtherUserId', 'validationBoundaryGoalId', 'validationDuplicateGoalId',",
+              "    'validationUpdateGoalId', 'validationReusableGoalId', 'validationReusableGoalChallengeId',",
+              "    'validationBoundaryChallengeId', 'validationUpdateChallengeId'",
+              "  ];",
+              "  previousRunVariables.forEach((name) => pm.collectionVariables.unset(name));",
+              "",
+              "  const runId = pm.variables.replaceIn('{{$guid}}').replace(/-/g, '');",
+              "  const localPart = 'v' + runId + 'x'.repeat(31);",
+              "  const validDomain = 'd'.repeat(63) + '.' + 'e'.repeat(47) + '.com';",
+              "  const longDomain = 'd'.repeat(63) + '.' + 'e'.repeat(47) + '.comx';",
+              "",
+              "  pm.collectionVariables.set('validationRunId', runId);",
+              "  pm.collectionVariables.set('validationBoundaryName', 'N'.repeat(120));",
+              "  pm.collectionVariables.set('validationBoundaryEmail', localPart + '@' + validDomain);",
+              "  pm.collectionVariables.set('validationTooLongEmail', localPart + '@' + longDomain);",
+              "  pm.collectionVariables.set('validationBoundaryPassword', 'P'.repeat(128));",
+              "  pm.collectionVariables.set('validationTooLongPassword', 'P'.repeat(129));",
+              "  pm.collectionVariables.set('validationShortPassword', 'P'.repeat(5));",
+              "  pm.collectionVariables.set('validationBadRegistrationEmail', 'invalid.' + runId + '@example.com');",
+              "  pm.collectionVariables.set('validationDuplicateEmail', (localPart + '@' + validDomain).toUpperCase());",
+              "  pm.collectionVariables.set('validationTooLongName', 'N'.repeat(121));",
+              "  pm.collectionVariables.set('validationGoalBoundaryTitle', 'G'.repeat(100));",
+              "  pm.collectionVariables.set('validationGoalTooLongTitle', 'G'.repeat(101));",
+              "  pm.collectionVariables.set('validationGoalBoundaryDescription', 'D'.repeat(200));",
+              "  pm.collectionVariables.set('validationGoalTooLongDescription', 'D'.repeat(201));",
+              "  pm.collectionVariables.set('validationGoalBoundaryCategory', 'C'.repeat(80));",
+              "  pm.collectionVariables.set('validationGoalTooLongCategory', 'C'.repeat(81));",
+              "  pm.collectionVariables.set('validationChallengeBoundaryTitle', 'T'.repeat(100));",
+              "  pm.collectionVariables.set('validationChallengeTooLongTitle', 'T'.repeat(101));",
+              "  pm.collectionVariables.set('validationChallengeBoundaryDescription', 'R'.repeat(200));",
+              "  pm.collectionVariables.set('validationChallengeTooLongDescription', 'R'.repeat(201));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "01 Register user at exact limits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Registro en límites máximos devuelve 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.userId).to.be.a('string');",
+                  "  pm.expect(json.name.length).to.eql(120);",
+                  "  pm.expect(json.email.length).to.eql(180);",
+                  "  pm.expect(pm.collectionVariables.get('validationBoundaryPassword').length).to.eql(128);",
+                  "});",
+                  "pm.collectionVariables.set('validationUserId', json.userId);",
+                  "pm.collectionVariables.set('validationEmail', json.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{validationBoundaryName}}\",\n  \"email\": \"{{validationBoundaryEmail}}\",\n  \"password\": \"{{validationBoundaryPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "02 Register a second user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('validationOtherEmail', 'other.' + pm.variables.replaceIn('{{$guid}}').replace(/-/g, '') + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El segundo usuario se registra', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.userId).to.be.a('string');",
+                  "  pm.expect(json.email).to.eql(pm.collectionVariables.get('validationOtherEmail'));",
+                  "});",
+                  "pm.collectionVariables.set('validationOtherUserId', json.userId);",
+                  "pm.collectionVariables.set('validationOtherEmailSaved', json.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Validation Other User\",\n  \"email\": \"{{validationOtherEmail}}\",\n  \"password\": \"{{validationBoundaryPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "03 Reject duplicate email ignoring case",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Registro con email ya usado: HTTP 409', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Registro con email ya usado: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(409);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Registro con email ya usado: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicate Validation User\",\n  \"email\": \"{{validationDuplicateEmail}}\",\n  \"password\": \"{{validationBoundaryPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "04 Reject registration name over 120",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Nombre de registro de 121 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Nombre de registro de 121 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Nombre de registro de 121 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{validationTooLongName}}\",\n  \"email\": \"{{validationBadRegistrationEmail}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "05 Reject registration email over 180",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Email de registro de 181 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Email de registro de 181 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Email de registro de 181 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Validation Invalid User\",\n  \"email\": \"{{validationTooLongEmail}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "06 Reject registration password below 6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Password de registro de 5 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Password de registro de 5 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Password de registro de 5 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Validation Invalid User\",\n  \"email\": \"{{validationBadRegistrationEmail}}\",\n  \"password\": \"{{validationShortPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "07 Reject registration password over 128",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Password de registro de 129 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Password de registro de 129 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Password de registro de 129 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Validation Invalid User\",\n  \"email\": \"{{validationBadRegistrationEmail}}\",\n  \"password\": \"{{validationTooLongPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "08 Login with password at maximum length",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login con password de 128 caracteres devuelve 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.userId).to.eql(pm.collectionVariables.get('validationUserId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{validationEmail}}\",\n  \"password\": \"{{validationBoundaryPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "09 Reject login password over 128",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login con password de 129 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Login con password de 129 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Login con password de 129 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{validationEmail}}\",\n  \"password\": \"{{validationTooLongPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "10 Update user at exact limits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de usuario en límites máximos devuelve 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.userId).to.eql(pm.collectionVariables.get('validationUserId'));",
+                  "  pm.expect(json.name.length).to.eql(120);",
+                  "  pm.expect(json.email.length).to.eql(180);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{validationBoundaryName}}\",\n  \"email\": \"{{validationEmail}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{validationUserId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "11 Reject update to another users email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización a email registrado por otro usuario: HTTP 409', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Actualización a email registrado por otro usuario: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(409);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Actualización a email registrado por otro usuario: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{validationOtherEmailSaved}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{validationUserId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "12 Reject user name over 120",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Nombre de usuario de 121 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Nombre de usuario de 121 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Nombre de usuario de 121 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{validationTooLongName}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{validationUserId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "13 Reject user email over 180",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Email de usuario de 181 caracteres: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Email de usuario de 181 caracteres: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Email de usuario de 181 caracteres: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{validationTooLongEmail}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{validationUserId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "14 Create goal at exact limits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Meta con título 100, descripción 200 y categoría 80 devuelve 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goalId).to.be.a('string');",
+                  "  pm.expect(json.targetDate).to.eql('2099-12-31');",
+                  "  pm.expect(json.title.length).to.eql(100);",
+                  "  pm.expect(json.description.length).to.eql(200);",
+                  "  pm.expect(json.category.length).to.eql(80);",
+                  "});",
+                  "pm.collectionVariables.set('validationBoundaryGoalId', json.goalId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"{{validationGoalBoundaryTitle}}\",\n  \"description\": \"{{validationGoalBoundaryDescription}}\",\n  \"category\": \"{{validationGoalBoundaryCategory}}\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "15 Update goal at exact limits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de meta acepta los límites máximos', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.title.length).to.eql(100);",
+                  "  pm.expect(json.description.length).to.eql(200);",
+                  "  pm.expect(json.category.length).to.eql(80);",
+                  "  pm.expect(json.targetDate).to.eql('2099-12-31');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"{{validationGoalBoundaryTitle}}\",\n  \"description\": \"{{validationGoalBoundaryDescription}}\",\n  \"category\": \"{{validationGoalBoundaryCategory}}\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals/{{validationBoundaryGoalId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "16 Create duplicate active goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Primera meta con título duplicable devuelve 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goalId).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('validationDuplicateGoalId', json.goalId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta duplicada QA\",\n  \"description\": \"Primera meta para validar título activo duplicado\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "17 Reject normalized duplicate active goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Meta activa duplicada tras normalizar título: HTTP 409', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Meta activa duplicada tras normalizar título: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(409);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Meta activa duplicada tras normalizar título: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"  META   DUPLICADA   QA  \",\n  \"description\": \"Debe chocar tras normalizar espacios y mayúsculas\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "18 Allow same goal title for another user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El mismo título se permite para otro usuario', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goalId).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationOtherUserId}}\",\n  \"title\": \"Meta duplicada QA\",\n  \"description\": \"El nombre se permite en otro usuario\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "19 Reject empty goal title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Título vacío en meta: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Título vacío en meta: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Título vacío en meta: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"   \",\n  \"description\": \"Título vacío\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "20 Reject empty goal category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Categoría vacía en meta: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Categoría vacía en meta: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Categoría vacía en meta: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Categoría vacía QA\",\n  \"description\": \"Categoría vacía\",\n  \"category\": \"   \",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "21 Reject empty targetDate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('targetDate vacío: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('targetDate vacío: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('targetDate vacío: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta sin fecha QA\",\n  \"description\": \"El targetDate vacío debe rechazarse\",\n  \"category\": \"QA\",\n  \"targetDate\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "22 Reject missing targetDate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('targetDate omitido: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('targetDate omitido: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('targetDate omitido: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta sin propiedad fecha QA\",\n  \"description\": \"Debe requerir targetDate\",\n  \"category\": \"QA\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "23 Reject malformed targetDate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('targetDate con formato inválido: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('targetDate con formato inválido: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('targetDate con formato inválido: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta fecha inválida QA\",\n  \"description\": \"Debe manejar el error de parseo como 400\",\n  \"category\": \"QA\",\n  \"targetDate\": \"no-es-una-fecha\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "24 Reject goal title over 100 on create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Título de meta de 101 caracteres al crear: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Título de meta de 101 caracteres al crear: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Título de meta de 101 caracteres al crear: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"{{validationGoalTooLongTitle}}\",\n  \"description\": \"Título sobre el límite\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "25 Reject goal description over 200 on create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Descripción de meta de 201 caracteres al crear: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Descripción de meta de 201 caracteres al crear: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Descripción de meta de 201 caracteres al crear: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Descripción larga QA\",\n  \"description\": \"{{validationGoalTooLongDescription}}\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "26 Reject goal category over 80 on create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Categoría de meta de 81 caracteres al crear: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Categoría de meta de 81 caracteres al crear: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Categoría de meta de 81 caracteres al crear: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Categoría larga QA\",\n  \"description\": \"Categoría sobre el límite\",\n  \"category\": \"{{validationGoalTooLongCategory}}\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "27 Create goal for update validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Meta para probar actualización creada', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goalId).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('validationUpdateGoalId', json.goalId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta editable QA\",\n  \"description\": \"Meta para probar validaciones de actualización\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "28 Reject goal update to duplicate active title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de meta a título activo duplicado: HTTP 409', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Actualización de meta a título activo duplicado: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(409);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Actualización de meta a título activo duplicado: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \" meta   duplicada qa \"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals/{{validationUpdateGoalId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "29 Reject goal title over 100 on update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Título de meta de 101 caracteres al actualizar: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Título de meta de 101 caracteres al actualizar: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Título de meta de 101 caracteres al actualizar: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"{{validationGoalTooLongTitle}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals/{{validationUpdateGoalId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "30 Reject goal description over 200 on update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Descripción de meta de 201 caracteres al actualizar: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Descripción de meta de 201 caracteres al actualizar: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Descripción de meta de 201 caracteres al actualizar: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"description\": \"{{validationGoalTooLongDescription}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals/{{validationUpdateGoalId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "31 Reject goal category over 80 on update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Categoría de meta de 81 caracteres al actualizar: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Categoría de meta de 81 caracteres al actualizar: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Categoría de meta de 81 caracteres al actualizar: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"category\": \"{{validationGoalTooLongCategory}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals/{{validationUpdateGoalId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "32 Create a goal to test title reuse after completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Meta para completar creada', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goalId).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('validationReusableGoalId', json.goalId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta reutilizable QA\",\n  \"description\": \"Se completa para liberar el nombre\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "33 Create the only challenge for reusable goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reto único creado', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.challengeId).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('validationReusableGoalChallengeId', json.challengeId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationReusableGoalId}}\",\n  \"title\": \"Completar meta reutilizable\",\n  \"description\": \"Reto único para completar la meta\",\n  \"xpReward\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "34 Complete challenge and verify goal completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Completar el único reto completa la meta', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goal.status).to.eql('COMPLETED');",
+                  "  pm.expect(json.challenge.status).to.eql('COMPLETED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{validationReusableGoalChallengeId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/complete"
+          },
+          "response": []
+        },
+        {
+          "name": "35 Allow goal title reuse after completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El título de una meta completada se puede reutilizar', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.goalId).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{validationUserId}}\",\n  \"title\": \"Meta reutilizable QA\",\n  \"description\": \"El título se libera al completar la meta previa\",\n  \"category\": \"QA\",\n  \"targetDate\": \"2099-12-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/goals"
+          },
+          "response": []
+        },
+        {
+          "name": "36 Create challenge at exact limits with zero XP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reto con título 100, descripción 200 y cero XP devuelve 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.challengeId).to.be.a('string');",
+                  "  pm.expect(json.title.length).to.eql(100);",
+                  "  pm.expect(json.description.length).to.eql(200);",
+                  "  pm.expect(json.xpReward).to.eql(0);",
+                  "});",
+                  "pm.collectionVariables.set('validationBoundaryChallengeId', json.challengeId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"{{validationChallengeBoundaryDescription}}\",\n  \"xpReward\": 0\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "37 Update challenge at exact limits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de reto acepta límites máximos y cero XP', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.title.length).to.eql(100);",
+                  "  pm.expect(json.description.length).to.eql(200);",
+                  "  pm.expect(json.xpReward).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"{{validationChallengeBoundaryDescription}}\",\n  \"xpReward\": 0\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/{{validationBoundaryChallengeId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "38 Create challenge with a title for duplicate checks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Primer reto con título duplicable devuelve 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.challengeId).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"Reto duplicado QA\",\n  \"description\": \"Primer reto pendiente con título repetible\",\n  \"xpReward\": 10\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "39 Reject normalized duplicate pending challenge",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reto pendiente duplicado tras normalizar título: HTTP 409', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Reto pendiente duplicado tras normalizar título: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(409);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Reto pendiente duplicado tras normalizar título: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"  RETO   DUPLICADO QA  \",\n  \"description\": \"Debe chocar tras normalizar espacios y mayúsculas\",\n  \"xpReward\": 10\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "40 Create a second challenge for update validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Segundo reto creado', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.challengeId).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('validationUpdateChallengeId', json.challengeId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"Reto editable QA\",\n  \"description\": \"Reto para probar validaciones de actualización\",\n  \"xpReward\": 5\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "41 Reject challenge update to duplicate pending title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de reto a título pendiente duplicado: HTTP 409', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Actualización de reto a título pendiente duplicado: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(409);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Actualización de reto a título pendiente duplicado: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \" reto   duplicado qa \"\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/{{validationUpdateChallengeId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "42 Reject challenge creation without xpReward",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Creación de reto sin xpReward: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Creación de reto sin xpReward: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Creación de reto sin xpReward: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"Reto sin XP QA\",\n  \"description\": \"La recompensa es obligatoria\"\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "43 Reject challenge creation with negative XP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Creación de reto con XP negativo: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Creación de reto con XP negativo: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Creación de reto con XP negativo: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"Reto con XP negativo QA\",\n  \"description\": \"La recompensa no puede ser negativa\",\n  \"xpReward\": -1\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "44 Reject empty challenge title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Título vacío en reto: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Título vacío en reto: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Título vacío en reto: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"   \",\n  \"description\": \"Título vacío\",\n  \"xpReward\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "45 Reject challenge title over 100 on create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Título de reto de 101 caracteres al crear: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Título de reto de 101 caracteres al crear: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Título de reto de 101 caracteres al crear: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeTooLongTitle}}\",\n  \"description\": \"Título sobre el límite\",\n  \"xpReward\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "46 Reject challenge description over 200 on create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Descripción de reto de 201 caracteres al crear: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Descripción de reto de 201 caracteres al crear: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Descripción de reto de 201 caracteres al crear: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"Descripción larga reto QA\",\n  \"description\": \"{{validationChallengeTooLongDescription}}\",\n  \"xpReward\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        },
+        {
+          "name": "47 Reject challenge title over 100 on update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Título de reto de 101 caracteres al actualizar: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Título de reto de 101 caracteres al actualizar: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Título de reto de 101 caracteres al actualizar: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeTooLongTitle}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/{{validationUpdateChallengeId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "48 Reject challenge description over 200 on update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Descripción de reto de 201 caracteres al actualizar: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Descripción de reto de 201 caracteres al actualizar: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Descripción de reto de 201 caracteres al actualizar: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"description\": \"{{validationChallengeTooLongDescription}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/{{validationUpdateChallengeId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "49 Reject challenge update with negative XP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualización de reto con XP negativo: HTTP 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const errorBody = pm.response.json();",
+                  "pm.test('Actualización de reto con XP negativo: envelope de error estable', function () {",
+                  "  pm.expect(errorBody.status).to.eql(400);",
+                  "  pm.expect(errorBody.error).to.be.a('string');",
+                  "  pm.expect(errorBody.message).to.be.a('string');",
+                  "  pm.expect(errorBody.message.trim().length).to.be.above(0);",
+                  "});",
+                  "pm.test('Actualización de reto con XP negativo: no expone detalles internos', function () {",
+                  "  pm.expect(pm.response.text()).not.to.match(/sql|constraint|exception|stacktrace/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"xpReward\": -1\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/{{validationUpdateChallengeId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "50 Complete challenge and allow challenge title reuse",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reto original queda completado', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.challenge.status).to.eql('COMPLETED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{validationBoundaryChallengeId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges/complete"
+          },
+          "response": []
+        },
+        {
+          "name": "51 Allow challenge title reuse after completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El título de un reto completado se puede reutilizar', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('La respuesta cumple el contrato esperado', function () {",
+                  "  pm.expect(json.challengeId).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalId\": \"{{validationBoundaryGoalId}}\",\n  \"title\": \"{{validationChallengeBoundaryTitle}}\",\n  \"description\": \"El título se libera al completar el reto previo\",\n  \"xpReward\": 0\n}"
+            },
+            "url": "{{baseUrl}}/api/challenges"
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
