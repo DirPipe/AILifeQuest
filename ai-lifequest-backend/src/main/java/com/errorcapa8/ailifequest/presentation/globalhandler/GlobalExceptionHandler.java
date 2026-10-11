@@ -2,6 +2,7 @@ package com.errorcapa8.ailifequest.presentation.globalhandler;
 
 import com.errorcapa8.ailifequest.application.exception.NotFoundException;
 import com.errorcapa8.ailifequest.application.exception.UnauthorizedException;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({DomainException.class, IllegalArgumentException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(Exception exception) {
         return buildResponse(HttpStatus.BAD_REQUEST, extractMessage(exception));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException exception) {
+        return buildResponse(HttpStatus.CONFLICT, exception.getMessage());
     }
 
     @ExceptionHandler(UnauthorizedException.class)

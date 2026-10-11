@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +22,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "goals", indexes = {
         @Index(name = "idx_goals_user_id", columnList = "user_id")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_goals_user_active_title", columnNames = {"user_id", "active_title_key"})
 })
 public class GoalEntity {
     @Id
@@ -32,6 +35,8 @@ public class GoalEntity {
     private UserEntity user;
     @Column(nullable = false, length = 100)
     private String title;
+    @Column(name = "active_title_key", length = 300)
+    private String activeTitleKey;
     @Column(length = 200)
     private String description;
     @Column(nullable = false, length = 80)
@@ -51,11 +56,18 @@ public class GoalEntity {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+        updateActiveTitleKey();
     }
 
     @PreUpdate
     void onUpdate() {
         updatedAt = LocalDateTime.now();
+        updateActiveTitleKey();
+    }
+
+    private void updateActiveTitleKey() {
+        activeTitleKey = status == GoalStatus.ACTIVE ?
+                com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer.normalize(title) : null;
     }
 
     public UUID getId() { return id; }

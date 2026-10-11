@@ -13,4 +13,6 @@ public interface GoalRepository {
     Optional<Goal> findById(GoalId id);
 
     List<Goal> findByUserId(UserId userId);
+
+    boolean existsActiveTitle(UserId userId, String normalizedTitle, GoalId excludingGoalId);
 }

@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface SpringDataGoalRepository extends JpaRepository<GoalEntity, UUID> {
     List<GoalEntity> findByUserId(UUID userId);
+
+    boolean existsByUserIdAndActiveTitleKey(UUID userId, String activeTitleKey);
+
+    boolean existsByUserIdAndActiveTitleKeyAndIdNot(UUID userId, String activeTitleKey, UUID excludingId);
 }

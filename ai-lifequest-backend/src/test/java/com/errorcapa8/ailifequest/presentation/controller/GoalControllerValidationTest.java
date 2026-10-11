@@ -2,6 +2,7 @@ package com.errorcapa8.ailifequest.presentation.controller;
 
 import com.errorcapa8.ailifequest.application.dto.request.CreateGoalRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.GoalResponseDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.application.service.GoalService;
 import com.errorcapa8.ailifequest.presentation.globalhandler.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +46,30 @@ class GoalControllerValidationTest {
         org.assertj.core.api.Assertions.assertThat(goalService.wasCalled()).isFalse();
     }
 
+    @Test
+    void mapsDuplicateGoalToConflictResponse() throws Exception {
+        goalService.failWith(new ConflictException("Ya existe una meta activa con ese título para este usuario."));
+
+        mockMvc.perform(post("/api/goals")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "userId": "b86cd5ed-8b0a-4db2-905e-676cf769cf81",
+                                  "title": "Meta duplicada",
+                                  "description": null,
+                                  "category": "Backend",
+                                  "targetDate": "2026-12-31"
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409));
+
+        org.assertj.core.api.Assertions.assertThat(goalService.wasCalled()).isTrue();
+    }
+
     private static final class RecordingGoalService extends GoalService {
         private boolean called;
+        private RuntimeException failure;
 
         private RecordingGoalService() {
             super(null, null);
@@ -55,7 +78,14 @@ class GoalControllerValidationTest {
         @Override
         public GoalResponseDTO createGoal(CreateGoalRequestDTO request) {
             called = true;
+            if (failure != null) {
+                throw failure;
+            }
             return null;
+        }
+
+        private void failWith(RuntimeException failure) {
+            this.failure = failure;
         }
 
         private boolean wasCalled() {

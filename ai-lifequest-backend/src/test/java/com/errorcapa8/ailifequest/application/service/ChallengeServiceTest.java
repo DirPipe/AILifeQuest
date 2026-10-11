@@ -3,6 +3,7 @@ package com.errorcapa8.ailifequest.application.service;
 import com.errorcapa8.ailifequest.application.dto.request.CreateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.UpdateChallengeRequestDTO;
 import com.errorcapa8.ailifequest.domain.enums.UserStatus;
+import com.errorcapa8.ailifequest.domain.enums.GoalStatus;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.Challenge;
 import com.errorcapa8.ailifequest.domain.model.Goal;
@@ -14,6 +15,7 @@ import com.errorcapa8.ailifequest.domain.repository.XpTransactionRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.ChallengeId;
 import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +116,15 @@ class ChallengeServiceTest {
             return goals.values().stream()
                     .filter(goal -> goal.getUserId().equals(userId))
                     .toList();
+        }
+
+        @Override
+        public boolean existsActiveTitle(UserId userId, String normalizedTitle, GoalId excludingGoalId) {
+            return goals.values().stream()
+                    .filter(goal -> goal.getUserId().equals(userId))
+                    .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE)
+                    .filter(goal -> excludingGoalId == null || !goal.getId().equals(excludingGoalId))
+                    .anyMatch(goal -> TitleNormalizer.normalize(goal.getTitle()).equals(normalizedTitle));
         }
     }
 

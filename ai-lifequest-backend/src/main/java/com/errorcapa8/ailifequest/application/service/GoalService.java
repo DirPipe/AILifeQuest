@@ -3,7 +3,9 @@ package com.errorcapa8.ailifequest.application.service;
 import com.errorcapa8.ailifequest.application.dto.request.CreateGoalRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.UpdateGoalRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.response.GoalResponseDTO;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.application.exception.NotFoundException;
+import com.errorcapa8.ailifequest.domain.enums.GoalStatus;
 import com.errorcapa8.ailifequest.domain.enums.UserStatus;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.Goal;
@@ -11,6 +13,7 @@ import com.errorcapa8.ailifequest.domain.model.User;
 import com.errorcapa8.ailifequest.domain.repository.GoalRepository;
 import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,9 @@ public class GoalService {
             throw new DomainException("Un usuario inactivo no puede crear nuevas metas.");
         }
         Goal goal = new Goal(new GoalId(UUID.randomUUID()), userId, request.title(), request.description(), request.category(), request.targetDate());
+        if (goalRepository.existsActiveTitle(userId, TitleNormalizer.normalize(goal.getTitle()), null)) {
+            throw new ConflictException("Ya existe una meta activa con ese título para este usuario.");
+        }
         return DtoMapper.toGoalResponse(goalRepository.save(goal));
     }
 
@@ -53,6 +59,10 @@ public class GoalService {
         UserId userId = new UserId(request.userId());
         if (!goal.getUserId().equals(userId)) {
             throw new DomainException("La meta no pertenece al usuario indicado.");
+        }
+        if (request.title() != null && goal.getStatus() == GoalStatus.ACTIVE
+                && goalRepository.existsActiveTitle(userId, TitleNormalizer.normalize(request.title()), goal.getId())) {
+            throw new ConflictException("Ya existe una meta activa con ese título para este usuario.");
         }
         goal.updateDetails(request.title(), request.description(), request.category(), request.targetDate());
         return DtoMapper.toGoalResponse(goalRepository.save(goal));

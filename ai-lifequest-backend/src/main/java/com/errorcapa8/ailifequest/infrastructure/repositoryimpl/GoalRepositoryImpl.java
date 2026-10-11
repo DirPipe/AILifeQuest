@@ -52,6 +52,15 @@ public class GoalRepositoryImpl implements GoalRepository {
                 .toList();
     }
 
+    @Override
+    public boolean existsActiveTitle(UserId userId, String normalizedTitle, GoalId excludingGoalId) {
+        if (excludingGoalId == null) {
+            return springDataGoalRepository.existsByUserIdAndActiveTitleKey(userId.value(), normalizedTitle);
+        }
+        return springDataGoalRepository.existsByUserIdAndActiveTitleKeyAndIdNot(
+                userId.value(), normalizedTitle, excludingGoalId.value());
+    }
+
     private Goal toDomainWithChallenges(GoalEntity entity) {
         List<Challenge> challenges = springDataChallengeRepository.findByGoalId(entity.getId()).stream()
                 .map(ChallengeMapper::toDomain)

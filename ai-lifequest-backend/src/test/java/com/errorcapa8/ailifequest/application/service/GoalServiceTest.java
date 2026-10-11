@@ -3,6 +3,8 @@ package com.errorcapa8.ailifequest.application.service;
 import com.errorcapa8.ailifequest.application.dto.request.CreateGoalRequestDTO;
 import com.errorcapa8.ailifequest.application.dto.request.UpdateGoalRequestDTO;
 import com.errorcapa8.ailifequest.domain.enums.UserStatus;
+import com.errorcapa8.ailifequest.domain.enums.GoalStatus;
+import com.errorcapa8.ailifequest.application.exception.ConflictException;
 import com.errorcapa8.ailifequest.domain.exception.DomainException;
 import com.errorcapa8.ailifequest.domain.model.Goal;
 import com.errorcapa8.ailifequest.domain.model.User;
@@ -10,6 +12,7 @@ import com.errorcapa8.ailifequest.domain.repository.GoalRepository;
 import com.errorcapa8.ailifequest.domain.repository.UserRepository;
 import com.errorcapa8.ailifequest.domain.valueobject.GoalId;
 import com.errorcapa8.ailifequest.domain.valueobject.UserId;
+import com.errorcapa8.ailifequest.domain.valueobject.TitleNormalizer;
 import com.errorcapa8.ailifequest.domain.valueobject.XP;
 import org.junit.jupiter.api.Test;
 
@@ -65,6 +68,69 @@ class GoalServiceTest {
                 .hasMessageContaining("no pertenece");
     }
 
+    @Test
+    void createGoalRejectsSameActiveTitleIgnoringCaseAndRepeatedSpaces() {
+        UUID userId = UUID.randomUUID();
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+        goalRepository.save(new Goal(new GoalId(UUID.randomUUID()), new UserId(userId), "Aprender Java", null,
+                "Estudio", LocalDate.now().plusDays(7)));
+
+        assertThatThrownBy(() -> goalService.createGoal(new CreateGoalRequestDTO(userId, "  APRENDER   JAVA ", null,
+                "Estudio", LocalDate.now().plusDays(14))))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("meta activa");
+    }
+
+    @Test
+    void sameActiveTitleIsAllowedForDifferentUsers() {
+        UUID firstUserId = UUID.randomUUID();
+        UUID secondUserId = UUID.randomUUID();
+        userRepository.save(new User(new UserId(firstUserId), "Ana", "ana@example.com"));
+        userRepository.save(new User(new UserId(secondUserId), "Luis", "luis@example.com"));
+        goalRepository.save(new Goal(new GoalId(UUID.randomUUID()), new UserId(firstUserId), "Aprender Java", null,
+                "Estudio", LocalDate.now().plusDays(7)));
+
+        var created = goalService.createGoal(new CreateGoalRequestDTO(secondUserId, "Aprender Java", null,
+                "Estudio", LocalDate.now().plusDays(14)));
+
+        assertThat(created.title()).isEqualTo("Aprender Java");
+    }
+
+    @Test
+    void updateGoalAllowsKeepingItsOwnTitleButRejectsAnotherActiveTitle() {
+        UUID userId = UUID.randomUUID();
+        UUID firstGoalId = UUID.randomUUID();
+        UUID secondGoalId = UUID.randomUUID();
+        goalRepository.save(new Goal(new GoalId(firstGoalId), new UserId(userId), "Aprender Java", null,
+                "Estudio", LocalDate.now().plusDays(7)));
+        goalRepository.save(new Goal(new GoalId(secondGoalId), new UserId(userId), "Aprender Kotlin", null,
+                "Estudio", LocalDate.now().plusDays(14)));
+
+        var unchangedName = goalService.updateGoal(firstGoalId,
+                new UpdateGoalRequestDTO(userId, "  APRENDER   JAVA ", null, null, null));
+
+        assertThat(unchangedName.title()).isEqualTo("APRENDER   JAVA");
+        assertThatThrownBy(() -> goalService.updateGoal(firstGoalId,
+                new UpdateGoalRequestDTO(userId, " Aprender Kotlin ", null, null, null)))
+                .isInstanceOf(ConflictException.class);
+        assertThat(goalRepository.findById(new GoalId(firstGoalId)).orElseThrow().getTitle())
+                .isEqualTo("APRENDER   JAVA");
+    }
+
+    @Test
+    void completedGoalDoesNotReserveItsTitle() {
+        UUID userId = UUID.randomUUID();
+        userRepository.save(new User(new UserId(userId), "Ana", "ana@example.com"));
+        Goal completedGoal = new Goal(new GoalId(UUID.randomUUID()), new UserId(userId), "Aprender Java", null,
+                "Estudio", LocalDate.now().plusDays(7), null, GoalStatus.COMPLETED, List.of());
+        goalRepository.save(completedGoal);
+
+        var created = goalService.createGoal(new CreateGoalRequestDTO(userId, "Aprender Java", null,
+                "Estudio", LocalDate.now().plusDays(14)));
+
+        assertThat(created.status()).isEqualTo(GoalStatus.ACTIVE.name());
+    }
+
     private static final class InMemoryGoalRepository implements GoalRepository {
         private final Map<GoalId, Goal> goals = new HashMap<>();
 
@@ -84,6 +150,15 @@ class GoalServiceTest {
             return goals.values().stream()
                     .filter(goal -> goal.getUserId().equals(userId))
                     .toList();
+        }
+
+        @Override
+        public boolean existsActiveTitle(UserId userId, String normalizedTitle, GoalId excludingGoalId) {
+            return goals.values().stream()
+                    .filter(goal -> goal.getUserId().equals(userId))
+                    .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE)
+                    .filter(goal -> excludingGoalId == null || !goal.getId().equals(excludingGoalId))
+                    .anyMatch(goal -> TitleNormalizer.normalize(goal.getTitle()).equals(normalizedTitle));
         }
     }
 
