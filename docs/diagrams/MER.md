@@ -1,6 +1,6 @@
 # Diagramas del MER - AI LifeQuest
 
-Este documento reúne las dos vistas gráficas del mismo modelo: el MER con notación pata de gallo y la vista que escribe las multiplicidades junto a sus símbolos. El esquema es objetivo; las relaciones y campos marcados como futuros todavía no representan flujos implementados.
+Este documento contiene el MER. El esquema es objetivo; las relaciones y campos marcados como futuros todavía no representan flujos implementados.
 
 ## Guía de colores
 
