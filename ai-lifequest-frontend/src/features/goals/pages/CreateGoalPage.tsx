@@ -13,10 +13,22 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
   const { goalId } = useParams<{ goalId: string }>();
   const isEditing = Boolean(goalId);
 
+  // Obtener la fecha actual en formato ISO "YYYY-MM-DD"
+  const getTodayString = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = getTodayString();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Tecnología');
-  const [targetDate, setTargetDate] = useState('');
+  // Se inicializa con la fecha actual en lugar de dejar el estado vacío
+  const [targetDate, setTargetDate] = useState(todayStr);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -32,7 +44,7 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
             setTitle(currentGoal.title);
             setDescription(currentGoal.description || '');
             setCategory(currentGoal.category || 'Tecnología');
-            setTargetDate(currentGoal.targetDate || '');
+            setTargetDate(currentGoal.targetDate || todayStr);
           } else {
             setErrorMessage('No se encontró la meta especificada.');
           }
@@ -45,7 +57,7 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
 
       loadGoalData();
     }
-  }, [goalId, isEditing, userId]);
+  }, [goalId, isEditing, userId, todayStr]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,17 +68,25 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
       return;
     }
 
+    // Validar que si no selecciona nada, use la fecha de hoy
+    const selectedDate = targetDate.trim() || todayStr;
+
+    // Validación para impedir seleccionar una fecha del pasado
+    if (selectedDate < todayStr) {
+      setErrorMessage('La fecha límite no puede ser anterior al día de hoy.');
+      return;
+    }
+
     try {
       setIsLoading(true);
 
       if (isEditing && goalId) {
-        // Incluimos userId para cumplir la validación de UpdateGoalRequestDTO en Spring Boot
         await apiService.updateGoal(goalId, {
           userId,
           title,
           description,
           category,
-          targetDate: targetDate || '2026-12-31',
+          targetDate: selectedDate,
         });
       } else {
         await apiService.createGoal({
@@ -74,7 +94,7 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
           title,
           description,
           category,
-          targetDate: targetDate || '2026-12-31',
+          targetDate: selectedDate,
         });
       }
 
@@ -93,7 +113,6 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
   return (
     <div className="create-goal-page-container">
       <div className="create-goal-card">
-        {/* Header compacto con el botón "Regresar" estilizado en la esquina superior derecha */}
         <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h2 style={{ margin: 0, fontSize: '1.3rem', color: 'var(--text-main)' }}>
             {isEditing ? '✏️ Editar Meta / Quest' : '🎯 Crear Nueva Meta / Quest'}
@@ -166,6 +185,7 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
                 type="date"
                 className="form-input"
                 value={targetDate}
+                min={todayStr} // Bloquea en el selector de fecha del navegador los días anteriores a hoy
                 onChange={(e) => setTargetDate(e.target.value)}
                 disabled={isLoading}
               />
