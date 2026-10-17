@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Rocket } from 'lucide-react';
-import { apiService } from '../services/api';
-import type { User } from '../types/index';
+import { apiService } from '../../../core/services/api';
+import type { User } from '../../../core/types/index';
 import './LoginForm.css';
 
 interface LoginFormProps {

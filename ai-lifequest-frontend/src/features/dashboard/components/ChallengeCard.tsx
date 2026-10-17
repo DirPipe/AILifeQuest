@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Swords } from 'lucide-react';
-import type { Challenge } from '../types/index';
-import xpImg from '../assets/xp.png';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Swords, Pencil } from 'lucide-react';
+import type { Challenge } from '../../../core/types/index';
+import xpImg from '../../../assets/xp.png';
 import './ChallengeCard.css';
 
 interface ChallengeCardProps {
@@ -10,6 +11,7 @@ interface ChallengeCardProps {
 }
 
 export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onComplete }) => {
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isCompleted = challenge.status === 'COMPLETED';
 
@@ -25,6 +27,11 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
     }
   };
 
+  const handleEditClick = () => {
+    // Redirige a la ruta de edición de retos enviando el goalId y el challengeId
+    navigate(`/challenges/edit/${challenge.goalId}/${challenge.id}`);
+  };
+
   return (
     <div className={`challenge-card ${isCompleted ? 'completed' : ''}`}>
       <div className="challenge-info">
@@ -38,11 +45,39 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
       </div>
 
       <div className="challenge-actions">
+        {/* Recompensa XP */}
         <div className="challenge-xp-badge">
           <img src={xpImg} alt="XP Icon" style={{ width: '16px', height: '16px' }} />
           <span>+{challenge.xpReward} XP</span>
         </div>
 
+        {/* Botón de Editar (Solo si el reto no ha sido completado aún) */}
+        {!isCompleted && (
+          <button
+            type="button"
+            className="edit-challenge-btn"
+            onClick={handleEditClick}
+            title="Editar Reto"
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-muted)',
+              padding: '0.35rem 0.6rem',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontSize: '0.8rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Pencil size={14} />
+            <span>Editar</span>
+          </button>
+        )}
+
+        {/* Botón o Badge de Estado Completado */}
         {isCompleted ? (
           <span className="completed-badge">Completado</span>
         ) : (

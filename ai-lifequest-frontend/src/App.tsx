@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import type { User } from './types/index';
-import { AuthPage } from './pages/AuthPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { apiService } from './services/api';
+import { BrowserRouter } from 'react-router-dom';
+import type { User } from './core/types/index';
+import { apiService } from './core/services/api';
+import { AppRouter } from './routes/AppRouter';
 import './App.css';
 
 const SESSION_USER_ID_KEY = 'lq_current_user_id';
@@ -44,6 +44,7 @@ export default function App() {
     setCurrentUser(null);
   };
 
+  // Pantalla de carga mientras se verifica la sesión
   if (isRestoringSession) {
     return (
       <div className="app-loading-screen">
@@ -55,11 +56,14 @@ export default function App() {
     );
   }
 
-  // Si no hay sesión, se muestra la AuthPage
-  if (!currentUser) {
-    return <AuthPage onLoginSuccess={handleLoginSuccess} />;
-  }
-
-  // Si hay sesión activa, entra al Dashboard con el Header responsivo
-  return <DashboardPage user={currentUser} onLogout={handleLogout} />;
+  // Envolver AppRouter dentro de BrowserRouter
+  return (
+    <BrowserRouter>
+      <AppRouter
+        currentUser={currentUser}
+        onLoginSuccess={handleLoginSuccess}
+        onLogout={handleLogout}
+      />
+    </BrowserRouter>
+  );
 }

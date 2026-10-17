@@ -1,14 +1,39 @@
-:root {
+/*:root {
   /* Paleta Opción 1: Cyberpunk / Gaming */
-  --bg-primary: #0F172A;      /* Azul Noche Oscuro */
-  --bg-card: #1E293B;         /* Azul Slate */
-  --primary: #6366F1;         /* Indigo / Púrpura Eléctrico */
-  --primary-hover: #4F46E5;   /* Hover para botones */
-  --xp-color: #F59E0B;        /* Oro / XP */
-  --success: #10B981;         /* Verde Neón */
-  --text-main: #F8FAFC;       /* Blanco / Texto principal */
-  --text-muted: #94A3B8;      /* Gris / Texto secundario */
-  --border-color: #334155;    /* Bordes discretos */
+  /*--bg-primary: #0F172A;      /* Azul Noche Oscuro */
+  /*--bg-card: #1E293B;         /* Azul Slate */
+  /*--primary: #6366F1;         /* Indigo / Púrpura Eléctrico */
+  /*--primary-hover: #4F46E5;   /* Hover para botones */
+  /*--xp-color: #F59E0B;        /* Oro / XP */
+  /*--success: #10B981;         /* Verde Neón */
+  /*--text-main: #F8FAFC;       /* Blanco / Texto principal */
+  /*--text-muted: #94A3B8;      /* Gris / Texto secundario */
+  /*--border-color: #334155;    /* Bordes discretos */
+/*}*/
+
+:root {
+  /* ==========================================================
+     PALETA ADOBE COLOR (Lavanda & Dorado Cálido - Clean Light)
+     ========================================================== */
+
+  /* Fondos principales sutiles y limpios */
+  --bg-primary: #F5F5FC;        /* Fondo general suave con ligero tinte lavanda */
+  --bg-card: #FCFBF5;           /* Fondo crema suave para tarjetas (GoalCard, ChallengeCard) */
+
+  /* Colores Principales / Marca */
+  --primary: #504FA8;           /* Índigo/Púrpura suave para botones principales y encabezados */
+  --primary-hover: #3E3D87;     /* Tono para hover de botones */
+
+  /* Acentos de Gamificación y Progreso (XP y Éxitos) */
+  --xp-color: #7D6E29;          /* Dorado/Oliva oscuro para número de XP y etiquetas */
+  --success: #BDAF6D;           /* Dorado claro / Miel para barras de progreso y metas completadas */
+
+  /* Textos y Lectura de Alto Contraste */
+  --text-main: #1D1B36;         /* Índigo muy oscuro (casi negro) para máxima legibilidad */
+  --text-muted: #5E5B82;        /* Texto secundario / gris violeta moderado */
+
+  /* Bordes y Separadores */
+  --border-color: #E2DFEE;      /* Bordes delicados con matiz lavanda */
 }
 
 /* Reset Global */

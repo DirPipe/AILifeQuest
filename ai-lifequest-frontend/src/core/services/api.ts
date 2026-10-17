@@ -10,6 +10,10 @@ const http = axios.create({
   },
 });
 
+/* ==========================================================
+   INTERFACES DE RESPUESTA DE LA API (DTOs del Backend)
+   ========================================================== */
+
 interface ApiErrorResponse {
   message?: string;
 }
@@ -52,6 +56,10 @@ interface GameProgressApiResponse {
   xpEarned: number;
 }
 
+/* ==========================================================
+   FUNCIONES MAPPER (API DTO -> Modelo de Dominio Frontend)
+   ========================================================== */
+
 const mapUser = (user: UserApiResponse): User => ({
   id: user.userId,
   name: user.name,
@@ -86,7 +94,7 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
       return error.response.data.message;
     }
     if (error.code === 'ERR_NETWORK') {
-      return 'No se pudo conectar con el backend. Verifica que Spring Boot este corriendo en http://localhost:8080.';
+      return 'No se pudo conectar con el backend. Verifica que Spring Boot esté corriendo en http://localhost:8080.';
     }
   }
 
@@ -97,13 +105,20 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
   return fallback;
 };
 
+/* ==========================================================
+   SERVICIO DE API (MÉTODOS Y ENDPOINTS)
+   ========================================================== */
+
 export const apiService = {
+  // --------------------------------------------------------
+  // AUTHENTICATION
+  // --------------------------------------------------------
   login: async (email: string, password: string): Promise<User> => {
     try {
       const response = await http.post<AuthApiResponse>('/auth/login', { email, password });
       return mapUser(response.data);
     } catch (error) {
-      throw new Error(getApiErrorMessage(error, 'Error al iniciar sesion.'));
+      throw new Error(getApiErrorMessage(error, 'Error al iniciar sesión.'));
     }
   },
 
@@ -116,6 +131,9 @@ export const apiService = {
     }
   },
 
+  // --------------------------------------------------------
+  // USERS
+  // --------------------------------------------------------
   getUser: async (userId: string): Promise<User> => {
     try {
       const response = await http.get<UserApiResponse>('/users', { params: { userId } });
@@ -125,6 +143,30 @@ export const apiService = {
     }
   },
 
+  updateUser: async (
+    userId: string,
+    payload: { name?: string; email?: string }
+  ): Promise<User> => {
+    try {
+      const response = await http.patch<UserApiResponse>(`/users/${userId}`, payload);
+      return mapUser(response.data);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Error al actualizar el usuario.'));
+    }
+  },
+
+  deactivateUser: async (userId: string): Promise<User> => {
+    try {
+      const response = await http.patch<UserApiResponse>(`/users/${userId}/deactivate`);
+      return mapUser(response.data);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Error al desactivar el usuario.'));
+    }
+  },
+
+  // --------------------------------------------------------
+  // GOALS
+  // --------------------------------------------------------
   getGoalsByUser: async (userId: string): Promise<Goal[]> => {
     try {
       const response = await http.get<GoalApiResponse[]>('/goals', { params: { userId } });
@@ -149,6 +191,28 @@ export const apiService = {
     }
   },
 
+ updateGoal: async (
+    goalId: string,
+    payload: {
+      userId?: string;
+      title?: string;
+      description?: string;
+      category?: string;
+      targetDate?: string;
+      status?: Goal['status'];
+    }
+  ): Promise<Goal> => {
+    try {
+      const response = await http.patch<GoalApiResponse>(`/goals/${goalId}`, payload);
+      return mapGoal(response.data);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Error al actualizar la meta.'));
+    }
+  },
+
+  // --------------------------------------------------------
+  // CHALLENGES
+  // --------------------------------------------------------
   getChallengesByGoal: async (goalId: string): Promise<Challenge[]> => {
     try {
       const response = await http.get<ChallengeApiResponse[]>('/challenges', { params: { goalId } });
@@ -172,9 +236,31 @@ export const apiService = {
     }
   },
 
-  completeChallenge: async (challengeId: string): Promise<{ updatedXp: number; goalProgress: number }> => {
+  updateChallenge: async (
+    challengeId: string,
+    payload: {
+      goalId?: string;
+      title?: string;
+      description?: string;
+      xpReward?: number;
+      status?: Challenge['status'];
+    }
+  ): Promise<Challenge> => {
     try {
-      const response = await http.patch<GameProgressApiResponse>('/challenges/complete', { challengeId });
+      const response = await http.patch<ChallengeApiResponse>(`/challenges/${challengeId}`, payload);
+      return mapChallenge(response.data);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Error al actualizar el reto.'));
+    }
+  },
+
+  completeChallenge: async (
+    challengeId: string
+  ): Promise<{ updatedXp: number; goalProgress: number }> => {
+    try {
+      const response = await http.patch<GameProgressApiResponse>('/challenges/complete', {
+        challengeId,
+      });
       return {
         updatedXp: response.data.user.totalXp,
         goalProgress: Math.round(response.data.goal.progress),
