@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import type { User } from '../types/index';
-import logoImg from '../assets/IA_LQ_v2.png';
-import xpImg from '../assets/xp.png';
-import { calculateLevelData } from '../utils/levelCalculator';
-import { UserStatsModal } from './UserStatsModal';
+import type { User } from '../../../core/types/index';
+import logoImg from '../../../assets/IA_LQ_v2.png';
+import xpImg from '../../../assets/xp.png';
+import { calculateLevelData } from '../../../core/utils/levelCalculator';
+import { UserStatsModal } from '../../../features/dashboard/components/UserStatsModal';
 import './UserXpHeader.css';
 
 interface UserXpHeaderProps {

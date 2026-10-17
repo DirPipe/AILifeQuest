@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
-import logoImg from '../assets/IA_LQ_v2.png';
-import { LoginForm } from '../forms/LoginForm.tsx';
-import { RegisterForm } from '../forms/RegisterForm.tsx';
+import logoImg from '../../../assets/IA_LQ_v2.png';
+import { LoginForm } from '../components/LoginForm.tsx';
+import { RegisterForm } from '../components/RegisterForm.tsx';
 import './AuthPage.css';
-
 interface AuthPageProps {
   onLoginSuccess: (user: any) => void;
 }

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Target, Trophy } from 'lucide-react';
-import type { User, Goal, Challenge } from '../types/index';
-import { apiService } from '../services/api';
-import { UserXpHeader } from '../components/UserXpHeader';
+import type { User, Goal, Challenge } from '../../../core/types/index';
+import { apiService } from '../../../core/services/api';
+import { UserXpHeader } from '../../user/components/UserXpHeader';
 import { GoalCard } from '../components/GoalCard';
-import { CreateGoalForm } from '../forms/CreateGoalForm';
-import { CreateChallengeForm } from '../forms/CreateChallengeForm';
 import './DashboardPage.css';
 
 interface DashboardPageProps {
@@ -14,12 +13,11 @@ interface DashboardPageProps {
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser, onLogout }) => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User>(initialUser);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [challengesByGoal, setChallengesByGoal] = useState<Record<string, Challenge[]>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [showGoalForm, setShowGoalForm] = useState(false);
-  const [activeChallengeGoalId, setActiveChallengeGoalId] = useState<string | null>(null);
 
   // Estado para la pestaña activa: 'ACTIVE' (por defecto) o 'COMPLETED'
   const [activeTab, setActiveTab] = useState<'ACTIVE' | 'COMPLETED'>('ACTIVE');
@@ -58,16 +56,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
     await loadDashboardData();
   };
 
-  const handleGoalCreated = () => {
-    setShowGoalForm(false);
-    loadDashboardData();
-  };
-
-  const handleChallengeCreated = () => {
-    setActiveChallengeGoalId(null);
-    loadDashboardData();
-  };
-
   // Clasificación de metas
   const activeGoals = goals.filter((g) => g.progressPercentage < 100);
   const completedGoals = goals.filter((g) => g.progressPercentage === 100);
@@ -97,11 +85,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
               Gestiona tus metas activas y consulta tus logros terminados.
             </p>
           </div>
+          {/* Redirección hacia la página dedicada para crear meta */}
           <button
-            onClick={() => setShowGoalForm(!showGoalForm)}
+            onClick={() => navigate('/goals/new')}
             className="submit-btn add-goal-btn"
           >
-            {showGoalForm ? 'Cancelar' : '+ Nueva Meta'}
+            + Nueva Meta
           </button>
         </div>
 
@@ -128,11 +117,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
           </button>
         </div>
 
-        {/* Formulario para Crear Meta */}
-        {showGoalForm && (
-          <CreateGoalForm userId={currentUser.id} onGoalCreated={handleGoalCreated} />
-        )}
-
         {/* Carga y Contenido según la pestaña seleccionada */}
         {isLoading ? (
           <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '2rem' }}>
@@ -151,7 +135,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
             ) : (
               activeGoals.map((goal) => {
                 const challenges = challengesByGoal[goal.id] || [];
-                const isAddingChallenge = activeChallengeGoalId === goal.id;
 
                 return (
                   <div key={goal.id}>
@@ -161,24 +144,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
                       onCompleteChallenge={handleCompleteChallenge}
                     />
 
+                    {/* Botón con redirección a la vista dedicada para crear reto */}
                     <div className="add-challenge-toggle-area">
                       <button
-                        onClick={() =>
-                          setActiveChallengeGoalId(isAddingChallenge ? null : goal.id)
-                        }
+                        onClick={() => navigate(`/challenges/new/${goal.id}`)}
                         className="toggle-challenge-btn"
                       >
-                        {isAddingChallenge
-                          ? 'Cerrar formulario de reto'
-                          : '+ Añadir un reto a esta meta'}
+                        + Añadir un reto a esta meta
                       </button>
-
-                      {isAddingChallenge && (
-                        <CreateChallengeForm
-                          goalId={goal.id}
-                          onChallengeCreated={handleChallengeCreated}
-                        />
-                      )}
                     </div>
                   </div>
                 );

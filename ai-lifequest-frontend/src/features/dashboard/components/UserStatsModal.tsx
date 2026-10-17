@@ -1,8 +1,8 @@
 import React from 'react';
 import { CheckCircle2, Swords, Target, Trophy, X } from 'lucide-react';
-import type { User } from '../types/index';
-import { calculateLevelData } from '../utils/levelCalculator';
-import xpImg from '../assets/xp.png';
+import type { User } from '../../../core/types/index';
+import { calculateLevelData } from '../../../core/utils/levelCalculator';
+import xpImg from '../../../assets/xp.png';
 import './UserStatsModal.css';
 
 interface UserStatsModalProps {

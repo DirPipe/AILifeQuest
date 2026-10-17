@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Rocket, Target } from 'lucide-react';
-import { apiService } from '../services/api';
-import type { Goal } from '../types/index';
-import './CreateGoalForm.css';
+import { apiService } from '../../../core/services/api';
+import type { Goal } from '../../../core/types/index';
+import './CreateGoalPage.css';
 
 interface CreateGoalFormProps {
   userId: string;
   onGoalCreated: (newGoal: Goal) => void;
 }
 
-export const CreateGoalForm: React.FC<CreateGoalFormProps> = ({ userId, onGoalCreated }) => {
+export const CreateGoalPage: React.FC<CreateGoalFormProps> = ({ userId, onGoalCreated }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Tecnología');

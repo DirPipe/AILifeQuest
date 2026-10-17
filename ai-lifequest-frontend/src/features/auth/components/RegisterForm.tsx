@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Swords } from 'lucide-react';
-import type { User } from '../types/index';
-import { apiService } from '../services/api';
+import type { User } from '../../../core/types/index';
+import { apiService } from '../../../core/services/api';
 import './RegisterForm.css';
 
 interface RegisterFormProps {

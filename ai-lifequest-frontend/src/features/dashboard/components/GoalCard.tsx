@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CalendarDays, Target, Trophy } from 'lucide-react';
-import type { Goal, Challenge } from '../types/index';
+import type { Goal, Challenge } from '../../../core/types/index';
 import { ProgressBar } from './ProgressBar';
 import { ChallengeCard } from './ChallengeCard';
 import './GoalCard.css';

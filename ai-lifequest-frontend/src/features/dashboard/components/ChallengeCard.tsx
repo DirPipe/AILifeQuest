@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Swords } from 'lucide-react';
-import type { Challenge } from '../types/index';
-import xpImg from '../assets/xp.png';
+import type { Challenge } from '../../../core/types/index';
+import xpImg from '../../../assets/xp.png';
 import './ChallengeCard.css';
 
 interface ChallengeCardProps {
