@@ -37,7 +37,7 @@ export const AppRouter: React.FC<AppRouterProps> = ({
           {/* Ruta del Dashboard con URL /dashboard */}
           <Route
             path="/dashboard"
-            element={<DashboardPage user={currentUser} onLogout={onLogout} />}
+            element={<DashboardPage user={currentUser} />}
           />
 
           <Route

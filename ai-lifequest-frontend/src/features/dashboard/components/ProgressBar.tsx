@@ -15,15 +15,23 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, showLabel 
       {showLabel && (
         <div className="progress-header">
           <span>Progreso de la Meta</span>
-          <span style={{ color: clampedValue === 100 ? 'var(--success)' : 'var(--text-main)' }}>
-            {clampedValue}% {clampedValue === 100 && '🎉'}
+          <span className={`progress-percentage ${clampedValue === 100 ? 'complete' : ''}`}>
+            {clampedValue}%
           </span>
         </div>
       )}
-      <div className="progress-track">
+      <div
+        className="progress-track"
+        role="progressbar"
+        aria-label="Progreso de la meta"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={clampedValue}
+      >
         <div
           className="progress-fill"
           style={{ width: `${clampedValue}%` }}
+          aria-hidden="true"
         />
       </div>
     </div>

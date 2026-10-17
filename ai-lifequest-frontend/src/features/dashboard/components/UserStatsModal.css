@@ -1,8 +1,8 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(8px);
+  background-color: rgba(28, 24, 53, 0.48);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,10 +16,10 @@
   width: 100%;
   max-width: 440px;
   background-color: var(--bg-card);
-  border: 1px solid var(--primary);
-  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
   padding: 2rem 1.8rem;
-  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 24px 70px rgba(20, 17, 41, 0.22);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -61,8 +61,8 @@
   font-size: 1.4rem;
   font-weight: bold;
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+  border: 3px solid #f1efff;
+  box-shadow: 0 4px 12px rgba(72, 58, 156, 0.16);
 }
 
 .modal-user-info {
@@ -116,8 +116,7 @@
 
 .modal-level-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  background: linear-gradient(90deg, #bd8b27 0%, #e1b64d 100%);
   border-radius: 20px;
   transition: width 0.4s ease;
 }

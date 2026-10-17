@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, Trophy } from 'lucide-react';
+import { Plus, Target, Trophy } from 'lucide-react';
 import type { User, Goal, Challenge } from '../../../core/types/index';
 import { apiService } from '../../../core/services/api';
 import { UserXpHeader } from '../../user/components/UserXpHeader';
@@ -9,10 +9,9 @@ import './DashboardPage.css';
 
 interface DashboardPageProps {
   user: User;
-  onLogout: () => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser, onLogout }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser }) => {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User>(initialUser);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -73,13 +72,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
         completedGoalsCount={completedGoals.length}
         activeChallengesCount={activeChallengesCount}
         completedChallengesCount={completedChallengesCount}
-        onLogout={onLogout}
       />
 
       <main className="dashboard-main">
         {/* Encabezado Principal */}
         <div className="dashboard-header-section">
           <div>
+            <span className="dashboard-eyebrow">Tu progreso, a tu ritmo</span>
             <h2 className="dashboard-title">Panel de Aventuras</h2>
             <p className="dashboard-subtitle">
               Gestiona tus metas activas y consulta tus logros terminados.
@@ -90,14 +89,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
             onClick={() => navigate('/goals/new')}
             className="submit-btn add-goal-btn"
           >
-            + Nueva Meta
+            <Plus size={17} />
+            Nueva meta
           </button>
         </div>
 
         {/* 2 Botones de Pestaña (Tabs) justo debajo del encabezado */}
-        <div className="dashboard-tabs-container">
+        <div className="dashboard-tabs-container" role="group" aria-label="Filtrar metas">
           <button
             type="button"
+            aria-pressed={activeTab === 'ACTIVE'}
             className={`tab-btn ${activeTab === 'ACTIVE' ? 'active' : ''}`}
             onClick={() => setActiveTab('ACTIVE')}
           >
@@ -108,6 +109,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
 
           <button
             type="button"
+            aria-pressed={activeTab === 'COMPLETED'}
             className={`tab-btn ${activeTab === 'COMPLETED' ? 'active' : ''}`}
             onClick={() => setActiveTab('COMPLETED')}
           >
@@ -119,17 +121,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
 
         {/* Carga y Contenido según la pestaña seleccionada */}
         {isLoading ? (
-          <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '2rem' }}>
-            Cargando tus metas...
-          </p>
+          <p className="dashboard-loading" role="status">Cargando tus metas...</p>
         ) : activeTab === 'ACTIVE' ? (
           /* VISTA PESTAÑA: METAS ACTIVAS */
           <section className="dashboard-section">
             {activeGoals.length === 0 ? (
               <div className="empty-goals-card">
+                <span className="empty-goals-icon"><Target size={24} /></span>
                 <h4 className="empty-goals-title">No tienes metas activas</h4>
                 <p className="empty-goals-desc">
-                  ¡Haz clic en "+ Nueva Meta" para comenzar tu primera aventura!
+                  Crea una meta y conviértela en pequeños retos que puedas completar cada día.
                 </p>
               </div>
             ) : (
@@ -137,7 +138,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
                 const challenges = challengesByGoal[goal.id] || [];
 
                 return (
-                  <div key={goal.id}>
+                  <div className="goal-list-item" key={goal.id}>
                     <GoalCard
                       goal={goal}
                       challenges={challenges}
@@ -150,7 +151,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
                         onClick={() => navigate(`/challenges/new/${goal.id}`)}
                         className="toggle-challenge-btn"
                       >
-                        + Añadir un reto a esta meta
+                        <Plus size={16} />
+                        Añadir un reto a esta meta
                       </button>
                     </div>
                   </div>
@@ -163,6 +165,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user: initialUser,
           <section className="dashboard-section">
             {completedGoals.length === 0 ? (
               <div className="empty-goals-card">
+                <span className="empty-goals-icon"><Trophy size={24} /></span>
                 <h4 className="empty-goals-title">Aún no has completado ninguna meta</h4>
                 <p className="empty-goals-desc">
                   Completa todos los retos de una meta para verla reflejada aquí.

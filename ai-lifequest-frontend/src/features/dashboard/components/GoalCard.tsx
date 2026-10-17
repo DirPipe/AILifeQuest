@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Target, Trophy, Pencil } from 'lucide-react';
+import { CalendarDays, ChevronDown, Target, Trophy, Pencil } from 'lucide-react';
 import type { Goal, Challenge } from '../../../core/types/index';
 import { ProgressBar } from './ProgressBar';
 import { ChallengeCard } from './ChallengeCard';
@@ -35,25 +35,13 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {goal.description && <p className="goal-description">{goal.description}</p>}
         </div>
 
-        <div className="goal-actions-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+        <div className="goal-actions-area">
           {/* Botón para navegar a la vista de Edición */}
           <button
             type="button"
             className="edit-goal-btn"
             onClick={() => navigate(`/goals/edit/${goal.id}`)}
-            style={{
-              background: 'none',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-muted)',
-              padding: '0.3rem 0.6rem',
-              borderRadius: '6px',
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              transition: 'all 0.2s ease',
-            }}
+            title="Editar meta"
           >
             <Pencil size={14} />
             <span>Editar</span>
@@ -77,19 +65,22 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           className="challenges-toggle-btn"
           onClick={() => setIsExpanded(!isExpanded)}
           type="button"
+          aria-expanded={isExpanded}
+          aria-controls={`goal-challenges-${goal.id}`}
         >
           <span className="challenges-toggle-title">
             <Target className="inline-icon primary-icon" />
-            Retos ({completedCount}/{challenges.length})
+            Retos <span className="challenge-count">{completedCount} de {challenges.length} completados</span>
           </span>
           <span className="toggle-arrow">
-            {isExpanded ? '▲ Ocultar retos' : '▼ Ver retos'}
+            {isExpanded ? 'Ocultar retos' : 'Ver retos'}
+            <ChevronDown size={16} aria-hidden="true" />
           </span>
         </button>
 
         {/* Lista de Retos (Desplegable) */}
         {isExpanded && (
-          <div className="challenges-list">
+          <div className="challenges-list" id={`goal-challenges-${goal.id}`}>
             {challenges.length === 0 ? (
               <p className="no-challenges-text">
                 No hay retos agregados a esta meta aún.

@@ -1,135 +1,148 @@
 .challenge-card {
   display: flex;
+  max-width: 100%;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
   gap: 1rem;
-  transition: all 0.2s ease-in-out;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
 .challenge-card:hover {
-  border-color: rgba(99, 102, 241, 0.4);
+  border-color: #d7d2eb;
+  background: #fefeff;
 }
 
 .challenge-card.completed {
-  border-color: rgba(16, 185, 129, 0.3);
-  opacity: 0.85;
+  border-color: #d7e9e1;
+  background: #fbfefc;
 }
 
 .challenge-info {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  min-width: 0;
   flex: 1;
+  flex-direction: column;
+  gap: 0.28rem;
 }
 
 .challenge-title {
-  font-size: 0.95rem;
-  font-weight: 600;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.42rem;
   color: var(--text-main);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 680;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .challenge-card.completed .challenge-title {
-  text-decoration: line-through;
-  color: var(--text-muted);
+  color: #5e766b;
 }
 
 .challenge-description {
-  font-size: 0.85rem;
   color: var(--text-muted);
+  font-size: 0.83rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .challenge-actions {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 0.8rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .challenge-xp-badge {
-  display: flex;
+  display: inline-flex;
+  min-height: 32px;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.6rem;
-  background-color: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--xp-color);
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 700;
+  gap: 0.32rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid #f0dfb7;
+  border-radius: 999px;
+  background: var(--xp-soft);
   color: var(--xp-color);
+  font-size: 0.76rem;
+  font-weight: 750;
   white-space: nowrap;
 }
 
+.challenge-xp-badge img {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
 .complete-btn {
-  padding: 0.5rem 0.9rem;
-  background-color: var(--success);
-  color: #FFFFFF;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: bold;
+  min-height: 36px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--success);
+  border-radius: 9px;
+  background: var(--success);
+  color: #fff;
+  font-size: 0.81rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   white-space: nowrap;
 }
 
 .complete-btn:hover:not(:disabled) {
-  opacity: 0.9;
+  background: #106b55;
+  box-shadow: 0 4px 10px rgba(22, 123, 98, 0.2);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.complete-btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .completed-badge {
-  padding: 0.4rem 0.8rem;
-  background-color: rgba(16, 185, 129, 0.15);
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #cde6d9;
+  border-radius: 999px;
+  background: var(--success-soft);
   color: var(--success);
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: bold;
+  font-size: 0.76rem;
+  font-weight: 750;
+  white-space: nowrap;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 680px) {
   .challenge-card {
-    flex-direction: column;
     align-items: flex-start;
+    flex-direction: column;
+    gap: 0.8rem;
   }
-  
+
   .challenge-actions {
     width: 100%;
-    justify-content: space-between;
-    margin-top: 0.5rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }
 
-/* Asegura contención en la tarjeta de reto */
-.challenge-card {
-  max-width: 100%;
-  box-sizing: border-box;
-}
+@media (max-width: 380px) {
+  .challenge-actions {
+    gap: 0.4rem;
+  }
 
-.challenge-info {
-  flex: 1; /* Ocupa el espacio disponible de forma flexible */
-  min-width: 0; /* Permite que el contenedor flexible se reduzca sin desbordar */
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
+  .challenge-xp-badge {
+    margin-right: auto;
+  }
 
-.challenge-title {
-  display: block;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.challenge-description {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  color: var(--text-muted);
-  font-size: 0.85rem;
+  .edit-challenge-btn span {
+    display: none;
+  }
 }

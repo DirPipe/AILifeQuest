@@ -47,7 +47,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
       <div className="challenge-actions">
         {/* Recompensa XP */}
         <div className="challenge-xp-badge">
-          <img src={xpImg} alt="XP Icon" style={{ width: '16px', height: '16px' }} />
+          <img src={xpImg} alt="" />
           <span>+{challenge.xpReward} XP</span>
         </div>
 
@@ -57,20 +57,8 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
             type="button"
             className="edit-challenge-btn"
             onClick={handleEditClick}
-            title="Editar Reto"
-            style={{
-              background: 'none',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-muted)',
-              padding: '0.35rem 0.6rem',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              fontSize: '0.8rem',
-              transition: 'all 0.2s ease',
-            }}
+            title="Editar reto"
+            aria-label={`Editar reto: ${challenge.title}`}
           >
             <Pencil size={14} />
             <span>Editar</span>
@@ -82,9 +70,11 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onCompl
           <span className="completed-badge">Completado</span>
         ) : (
           <button
+            type="button"
             className="complete-btn"
             onClick={handleCompleteClick}
             disabled={isSubmitting}
+            aria-label={`Completar reto: ${challenge.title}`}
           >
             {isSubmitting ? (
               'Guardando...'
