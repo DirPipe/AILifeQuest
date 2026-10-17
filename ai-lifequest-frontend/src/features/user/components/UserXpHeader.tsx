@@ -40,56 +40,58 @@ export const UserXpHeader: React.FC<UserXpHeaderProps> = ({
     <>
       <header className="xp-header">
         {/* Marca / Logo (Redirige al Dashboard) */}
-        <div
+        <button
+          type="button"
           className="header-brand"
           onClick={() => navigate('/dashboard')}
-          style={{ cursor: 'pointer' }}
           title="Ir al Panel Principal"
         >
           <img src={logoImg} alt="AI LifeQuest Logo" className="header-logo" />
-          <h1 className="header-title">AI LifeQuest</h1>
-        </div>
+          <span className="header-title">AI LifeQuest</span>
+        </button>
 
         {user && levelData ? (
           <div className="header-user-section">
             {/* Barra de Nivel e Indicador de XP interactivo (Abre el Modal de Estadísticas) */}
-            <div
+            <button
+              type="button"
               className="xp-level-container"
               onClick={() => setShowModal(true)}
               title="Haz clic para ver tus estadísticas detalladas"
+              aria-label={`Ver estadísticas de nivel ${levelData.level}`}
             >
               <span className="level-number-badge">LVL {levelData.level}</span>
 
-              <div className="header-xp-info">
-                <div className="header-xp-text">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                    <img src={xpImg} alt="XP" style={{ width: '14px', height: '14px' }} />
+              <span className="header-xp-info">
+                <span className="header-xp-text">
+                  <span className="header-xp-current">
+                    <img src={xpImg} alt="" />
                     <span>{levelData.xpInCurrentLevel} XP</span>
-                  </div>
-                  <span style={{ opacity: 0.7, fontSize: '0.7rem' }}>
+                  </span>
+                  <span className="header-xp-required">
                     / {levelData.xpRequiredForNextLevel}
                   </span>
-                </div>
+                </span>
 
-                <div className="header-xp-bar-track">
-                  <div
+                <span className="header-xp-bar-track">
+                  <span
                     className="header-xp-bar-fill"
                     style={{ width: `${levelData.progressPercentage}%` }}
                   />
-                </div>
-              </div>
-            </div>
+                </span>
+              </span>
+            </button>
 
             {/* Perfil (Redirige a la página /profile) */}
-            <div
+            <button
+              type="button"
               className="user-profile"
               onClick={() => navigate('/profile')}
-              style={{ cursor: 'pointer' }}
               title="Ver mi Perfil y Configuración"
             >
               <span className="user-name">{user.name}</span>
-              <div className="user-avatar">{getInitials(user.name)}</div>
-            </div>
+              <span className="user-avatar">{getInitials(user.name)}</span>
+            </button>
           </div>
         ) : (
           <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>

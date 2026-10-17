@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User as UserIcon, ShieldAlert, LogOut, Check, Target, Trophy, Swords, X } from 'lucide-react';
+import { User as UserIcon, ShieldAlert, LogOut, Check, Target, Trophy, Swords, X, Pencil, ArrowLeft } from 'lucide-react';
 import type { User } from '../../../core/types/index';
 import { apiService } from '../../../core/services/api';
 import { calculateLevelData } from '../../../core/utils/levelCalculator';
@@ -138,23 +138,18 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
             type="button"
             className="submit-btn"
             onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.4rem 0.9rem',
-              fontSize: '0.9rem',
-              width: 'auto',
-              margin: 0,
-            }}
           >
-            ← Regresar
+            <ArrowLeft size={16} />
+            Volver
           </button>
         </header>
 
-        {pageError && <div className="form-error" style={{ marginBottom: '1rem' }}>{pageError}</div>}
+        {pageError && <div className="form-error profile-page-error">{pageError}</div>}
 
         {/* 1. DATOS DE LA CUENTA */}
         <section className="profile-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-            <h3 className="section-title" style={{ margin: 0 }}>
+          <div className="profile-section-heading">
+            <h3 className="section-title">
               <UserIcon size={18} className="inline-icon primary-icon" />
               Datos de la Cuenta
             </h3>
@@ -169,15 +164,9 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
                 setModalError(null);
                 setShowEditModal(true);
               }}
-              style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.85rem',
-                width: 'auto',
-                margin: 0,
-                backgroundColor: 'var(--primary)',
-              }}
             >
-              ✏️ Editar Información
+              <Pencil size={15} />
+              Editar información
             </button>
           </div>
 
@@ -193,7 +182,7 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
             <div className="info-item">
               <span className="info-label">Experiencia Total (XP)</span>
               <span className="info-value xp-value">
-                <img src={xpImg} alt="XP" style={{ width: '16px', height: '16px' }} />
+                <img src={xpImg} alt="" />
                 {user.totalXp} XP (Nivel {levelData.level})
               </span>
             </div>
@@ -202,10 +191,10 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
 
         {/* 2. RESUMEN Y ESTADÍSTICAS DEL JUGADOR */}
         <section className="profile-section">
-          <h3 className="section-title">📊 Resumen del Jugador</h3>
+          <h3 className="section-title"><Trophy size={18} className="primary-icon" /> Resumen del jugador</h3>
           
           {isStatsLoading ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '1rem' }}>
+            <p className="stats-loading" role="status">
               Cargando métricas del usuario...
             </p>
           ) : (
@@ -306,19 +295,20 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
         <div className="profile-modal-overlay">
           <div className="profile-modal-card">
             <div className="profile-modal-header">
-              <h4>✏️ Editar Información de Usuario</h4>
+              <h4><Pencil size={17} className="primary-icon" /> Editar información</h4>
               <button
                 type="button"
                 className="close-modal-btn"
                 onClick={() => setShowEditModal(false)}
+                aria-label="Cerrar ventana de edición"
               >
                 <X size={18} />
               </button>
             </div>
 
-            {modalError && <div className="form-error" style={{ marginBottom: '0.8rem' }}>{modalError}</div>}
+            {modalError && <div className="form-error">{modalError}</div>}
 
-            <form onSubmit={handleSaveUser} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSaveUser} className="profile-modal-form">
               <div className="form-group">
                 <label className="form-label" htmlFor="modal-name">Nombre Completo</label>
                 <input
@@ -343,7 +333,7 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <div className="profile-modal-actions">
                 <button
                   type="button"
                   className="cancel-btn"
@@ -356,9 +346,8 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
                   type="submit"
                   className="submit-btn"
                   disabled={isUpdating}
-                  style={{ width: 'auto', padding: '0.5rem 1.2rem' }}
                 >
-                  {isUpdating ? 'Guardando...' : '💾 Guardar Cambios'}
+                  {isUpdating ? 'Guardando...' : 'Guardar cambios'}
                 </button>
               </div>
             </form>

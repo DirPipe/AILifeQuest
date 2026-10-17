@@ -1,146 +1,227 @@
-/* Contenedor del Header */
 .xp-header {
+  position: sticky;
+  z-index: 100;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.8rem 1.5rem;
-  background-color: var(--bg-card);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  gap: 1rem;
+  min-height: 76px;
+  padding: 0.65rem max(1.25rem, calc((100vw - 1100px) / 2));
+  border-bottom: 1px solid rgba(229, 226, 239, 0.88);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 16px rgba(42, 35, 82, 0.04);
+  backdrop-filter: blur(16px);
 }
 
 .header-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.65rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 .header-logo {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
 }
 
 .header-title {
-  font-size: 1.35rem;
-  font-weight: 700;
   color: var(--text-main);
-  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 780;
+  letter-spacing: -0.035em;
 }
 
 .header-user-section {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 0.7rem;
 }
 
-/* Badge del Nivel y Barra XP Clickeable */
 .xp-level-container {
-  background-color: rgba(245, 158, 11, 0.08);
-  border: 1px solid var(--xp-color);
-  padding: 0.4rem 0.85rem;
-  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.7rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #eedfb9;
+  border-radius: 12px;
+  background: #fffaf0;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
-}
-
-.modal-level-subtext {
-  text-align: right;
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
 .xp-level-container:hover {
-  background-color: rgba(245, 158, 11, 0.18);
-  transform: translateY(-1px);
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+  border-color: #dfc78c;
+  background: #fff6e3;
 }
 
 .level-number-badge {
-  background-color: var(--xp-color);
-  color: #0F172A;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 29px;
+  padding: 0.18rem 0.48rem;
+  border-radius: 8px;
+  background: var(--xp-color);
+  color: #fff;
+  font-size: 0.71rem;
   font-weight: 800;
-  font-size: 0.8rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 12px;
   white-space: nowrap;
 }
 
 .header-xp-info {
   display: flex;
+  min-width: 100px;
   flex-direction: column;
-  gap: 0.2rem;
-  min-width: 90px;
+  gap: 0.25rem;
 }
 
 .header-xp-text {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
+  gap: 0.35rem;
   color: var(--xp-color);
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.header-xp-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+}
+
+.header-xp-current img {
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+}
+
+.header-xp-required {
+  color: #8b7950;
+  font-size: 0.66rem;
+  font-weight: 550;
 }
 
 .header-xp-bar-track {
+  display: block;
   width: 100%;
-  height: 6px;
-  background-color: rgba(15, 23, 42, 0.6);
-  border-radius: 10px;
+  height: 5px;
   overflow: hidden;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 999px;
+  background: #e9e2d0;
 }
 
 .header-xp-bar-fill {
+  display: block;
   height: 100%;
-  background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);
-  border-radius: 10px;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
-  transition: width 0.4s ease;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #bd8b27, #e1b64d);
+  transition: width 400ms ease;
 }
 
-/* Perfil de Usuario */
 .user-profile {
-  display: flex;
+  display: inline-flex;
+  min-height: 44px;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
+  padding: 0.2rem 0.25rem 0.2rem 0.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.user-profile:hover {
+  background: var(--bg-soft);
 }
 
 .user-name {
+  max-width: 170px;
+  overflow: hidden;
   color: var(--text-main);
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, #818CF8 100%);
-  color: #ffffff;
-  display: flex;
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #7668d0, #4d3eb1);
+  box-shadow: 0 2px 8px rgba(72, 58, 156, 0.2);
+  color: #fff;
+  font-size: 0.81rem;
+  font-weight: 750;
 }
 
-@media (max-width: 768px) {
-  .header-title, .user-name {
+@media (max-width: 600px) {
+  .xp-header {
+    min-height: 66px;
+    gap: 0.5rem;
+    padding-inline: 0.7rem;
+  }
+
+  .header-logo {
+    width: 39px;
+    height: 39px;
+  }
+
+  .header-title {
+    font-size: 0.94rem;
+  }
+
+  .header-user-section {
+    gap: 0.35rem;
+  }
+
+  .xp-level-container {
+    gap: 0.4rem;
+    padding: 0.32rem 0.4rem;
+  }
+
+  .header-xp-info {
+    min-width: 72px;
+  }
+
+  .user-profile {
+    min-height: 40px;
+    gap: 0.25rem;
+    padding-inline: 0.15rem;
+  }
+
+  .user-name {
     display: none;
   }
-  .header-logo {
-    width: 44px;
-    height: 44px;
+
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 390px) {
+  .header-title {
+    display: none;
+  }
+
+  .header-xp-info {
+    display: none;
   }
 }
