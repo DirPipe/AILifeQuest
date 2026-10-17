@@ -1,18 +1,102 @@
-.challenge-form-card {
-  background-color: var(--bg-primary);
-  border: 1px dashed var(--primary);
-  border-radius: 10px;
-  padding: 1.2rem;
-  margin-top: 1rem;
-  text-align: left;
+.create-challenge-page-container {
+  display: grid;
+  min-height: 100vh;
+  place-items: start center;
+  padding: clamp(1rem, 5vh, 3.5rem) 1rem;
 }
 
-.challenge-form-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 1rem;
+.create-challenge-card {
+  width: min(100%, 650px);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.create-challenge-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.create-challenge-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1.3rem;
+  font-weight: 740;
+  letter-spacing: -0.03em;
+}
+
+.form-back-btn {
+  display: inline-flex;
+  min-height: 40px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.form-back-btn:hover {
+  border-color: #d5d0eb;
+  background: var(--bg-soft);
+  color: var(--primary);
+}
+
+.challenge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.challenge-form .submit-btn {
+  align-self: flex-start;
+  min-width: 175px;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 560px) {
+  .create-challenge-page-container {
+    padding: 0.75rem;
+  }
+
+  .create-challenge-card {
+    border-radius: 15px;
+  }
+
+  .create-challenge-header {
+    align-items: flex-start;
+  }
+
+  .create-challenge-title {
+    font-size: 1.1rem;
+  }
+
+  .challenge-form .submit-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .create-challenge-header {
+    flex-direction: column;
+  }
+
+  .form-back-btn {
+    align-self: flex-start;
+  }
 }

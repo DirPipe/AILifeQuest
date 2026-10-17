@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Swords } from 'lucide-react';
+import { ArrowLeft, Swords } from 'lucide-react';
 import { apiService } from '../../../core/services/api';
 import './CreateChallengePage.css';
 
@@ -104,51 +104,31 @@ export const CreateChallengePage: React.FC<CreateChallengePageProps> = ({
     <div className="create-challenge-page-container">
       <div className="create-challenge-card">
         {/* Encabezado con botón de Regresar alineado a la derecha */}
-        <div
-          className="page-header"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '1.2rem',
-          }}
-        >
+        <div className="create-challenge-header">
           <h2
-            className="challenge-form-title"
-            style={{
-              margin: 0,
-              fontSize: '1.3rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
+            className="create-challenge-title challenge-form-title"
           >
-            <Swords className="inline-icon primary-icon" />
-            {isEditing ? '✏️ Editar Reto' : '⚔️ Agregar Nuevo Reto'}
+            <Swords className="primary-icon" size={21} />
+            {isEditing ? 'Editar reto' : 'Añadir un reto'}
           </h2>
 
           <button
             type="button"
-            className="submit-btn"
+            className="form-back-btn"
             onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.4rem 0.9rem',
-              fontSize: '0.9rem',
-              width: 'auto',
-              margin: 0,
-            }}
           >
-            ← Regresar
+            <ArrowLeft size={16} />
+            Volver
           </button>
         </div>
 
         {errorMessage && (
-          <div className="form-error" style={{ marginBottom: '0.8rem' }}>
+          <div className="form-error">
             {errorMessage}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="challenge-form">
           <div className="form-group">
             <label className="form-label" htmlFor="ch-title">
               Título del Reto
@@ -201,13 +181,12 @@ export const CreateChallengePage: React.FC<CreateChallengePageProps> = ({
             type="submit"
             className="submit-btn"
             disabled={isLoading}
-            style={{ backgroundColor: 'var(--success)', marginTop: '0.5rem' }}
           >
             {isLoading
               ? 'Guardando...'
               : isEditing
-              ? '💾 Actualizar Reto'
-              : '+ Añadir Reto'}
+              ? 'Guardar cambios'
+              : 'Añadir reto'}
           </button>
         </form>
       </div>
