@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Target } from 'lucide-react';
 import { apiService } from '../../../core/services/api';
 import './CreateGoalPage.css';
 
@@ -113,22 +114,18 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
   return (
     <div className="create-goal-page-container">
       <div className="create-goal-card">
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.3rem', color: 'var(--text-main)' }}>
-            {isEditing ? '✏️ Editar Meta / Quest' : '🎯 Crear Nueva Meta / Quest'}
+        <div className="create-goal-header">
+          <h2 className="create-goal-title">
+            <Target className="primary-icon" size={21} />
+            {isEditing ? 'Editar meta' : 'Crear una meta'}
           </h2>
           <button
             type="button"
-            className="submit-btn"
+            className="form-back-btn"
             onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.4rem 0.9rem',
-              fontSize: '0.9rem',
-              width: 'auto',
-              margin: 0,
-            }}
           >
-            ← Regresar
+            <ArrowLeft size={16} />
+            Volver
           </button>
         </div>
 
@@ -196,8 +193,8 @@ export const CreateGoalPage: React.FC<CreateGoalPageProps> = ({ userId, onGoalCr
             {isLoading
               ? 'Guardando...'
               : isEditing
-              ? '💾 Actualizar Meta'
-              : '🚀 Guardar Meta'}
+              ? 'Guardar cambios'
+              : 'Crear meta'}
           </button>
         </form>
       </div>
