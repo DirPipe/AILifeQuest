@@ -129,3 +129,35 @@
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Asegura que el contenedor no se extienda horizontalmente */
+.goal-card {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Evita que contenido sobresalga */
+}
+
+/* Área del título */
+.goal-title-area {
+  max-width: 100%;
+  overflow-wrap: anywhere; /* Rompe palabras ultra largas en cualquier punto */
+  word-break: break-word;   /* Garantiza el salto de línea en navegadores estándar */
+}
+
+.goal-title {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 0.3rem 0;
+}
+
+.goal-description {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}

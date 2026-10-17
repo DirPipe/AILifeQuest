@@ -105,3 +105,31 @@
     margin-top: 0.5rem;
   }
 }
+
+/* Asegura contención en la tarjeta de reto */
+.challenge-card {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.challenge-info {
+  flex: 1; /* Ocupa el espacio disponible de forma flexible */
+  min-width: 0; /* Permite que el contenedor flexible se reduzca sin desbordar */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.challenge-title {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.challenge-description {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
