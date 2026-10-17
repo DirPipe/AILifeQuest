@@ -58,13 +58,17 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
         {/* Pestañas de alternancia */}
         <div className="auth-toggle-container">
           <button
+            type="button"
             onClick={() => setIsLogin(true)}
+            aria-pressed={isLogin}
             className={`auth-toggle-btn ${isLogin ? 'active' : ''}`}
           >
             Iniciar Sesión
           </button>
           <button
+            type="button"
             onClick={() => setIsLogin(false)}
+            aria-pressed={!isLogin}
             className={`auth-toggle-btn ${!isLogin ? 'active' : ''}`}
           >
             Registrarse
@@ -72,7 +76,7 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
         </div>
 
         {/* Formulario Renderizado */}
-        <div style={{ marginTop: '1.5rem' }}>
+        <div className="auth-form-wrapper">
           {isLogin ? (
             <LoginForm onSuccess={onLoginSuccess} />
           ) : (
