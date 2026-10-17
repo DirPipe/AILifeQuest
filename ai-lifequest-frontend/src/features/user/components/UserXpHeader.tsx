@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { User } from '../../../core/types/index';
 import logoImg from '../../../assets/IA_LQ_v2.png';
 import xpImg from '../../../assets/xp.png';
 import { calculateLevelData } from '../../../core/utils/levelCalculator';
-import { UserStatsModal } from '../../../features/dashboard/components/UserStatsModal';
+import { UserStatsModal } from '../../dashboard/components/UserStatsModal';
 import './UserXpHeader.css';
 
 interface UserXpHeaderProps {
@@ -13,7 +14,6 @@ interface UserXpHeaderProps {
   activeChallengesCount?: number;
   completedChallengesCount?: number;
   totalGoalsCount?: number;
-  onLogout?: () => void;
 }
 
 export const UserXpHeader: React.FC<UserXpHeaderProps> = ({
@@ -22,8 +22,8 @@ export const UserXpHeader: React.FC<UserXpHeaderProps> = ({
   completedGoalsCount = 0,
   activeChallengesCount = 0,
   completedChallengesCount = 0,
-  onLogout,
 }) => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
   const getInitials = (name: string): string => {
@@ -39,15 +39,20 @@ export const UserXpHeader: React.FC<UserXpHeaderProps> = ({
   return (
     <>
       <header className="xp-header">
-        {/* Marca / Logo */}
-        <div className="header-brand">
+        {/* Marca / Logo (Redirige al Dashboard) */}
+        <div
+          className="header-brand"
+          onClick={() => navigate('/dashboard')}
+          style={{ cursor: 'pointer' }}
+          title="Ir al Panel Principal"
+        >
           <img src={logoImg} alt="AI LifeQuest Logo" className="header-logo" />
           <h1 className="header-title">AI LifeQuest</h1>
         </div>
 
         {user && levelData ? (
           <div className="header-user-section">
-            {/* Barra de Nivel e Indicador de XP interactivo */}
+            {/* Barra de Nivel e Indicador de XP interactivo (Abre el Modal de Estadísticas) */}
             <div
               className="xp-level-container"
               onClick={() => setShowModal(true)}
@@ -75,12 +80,12 @@ export const UserXpHeader: React.FC<UserXpHeaderProps> = ({
               </div>
             </div>
 
-            {/* Perfil */}
+            {/* Perfil (Redirige a la página /profile) */}
             <div
               className="user-profile"
-              onClick={onLogout}
-              style={{ cursor: onLogout ? 'pointer' : 'default' }}
-              title={onLogout ? 'Clic para cerrar sesión' : ''}
+              onClick={() => navigate('/profile')}
+              style={{ cursor: 'pointer' }}
+              title="Ver mi Perfil y Configuración"
             >
               <span className="user-name">{user.name}</span>
               <div className="user-avatar">{getInitials(user.name)}</div>

@@ -5,6 +5,7 @@ import { AuthPage } from '../features/auth/pages/AuthPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { CreateGoalPage } from '../features/goals/pages/CreateGoalPage';
 import { CreateChallengePage } from '../features/challenges/pages/CreateChallengePage';
+import { UserProfilePage } from '../features/user/pages/UserProfilePage';
 
 interface AppRouterProps {
   currentUser: User | null;
@@ -54,6 +55,67 @@ export const AppRouter: React.FC<AppRouterProps> = ({
             element={
               <CreateChallengePage
                 onChallengeCreated={() => navigate('/dashboard')}
+              />
+            }
+          />
+
+          {/* 1. METAS: Creación y Edición */}
+          <Route
+            path="/goals/new"
+            element={
+              <CreateGoalPage
+                userId={currentUser.id}
+                onGoalCreated={() => navigate('/dashboard')}
+              />
+            }
+          />
+          <Route
+            path="/goals/edit/:goalId"
+            element={
+              <CreateGoalPage
+                userId={currentUser.id}
+                onGoalCreated={() => navigate('/dashboard')}
+              />
+            }
+          />
+
+          {/* 2. RETOS: Creación y Edición */}
+          <Route
+            path="/challenges/new/:goalId"
+            element={
+              <CreateChallengePage
+                onChallengeCreated={() => navigate('/dashboard')}
+              />
+            }
+          />
+          <Route
+            path="/challenges/edit/:goalId/:challengeId"
+            element={
+              <CreateChallengePage
+                onChallengeCreated={() => navigate('/dashboard')}
+              />
+            }
+          />
+
+          {/* Ruta compartida para edición */}
+          <Route
+            path="/goals/edit/:goalId"
+            element={
+              <CreateGoalPage
+                userId={currentUser.id}
+                onGoalCreated={() => navigate('/dashboard')}
+              />
+            }
+          />
+
+          {/* Dentro de <Routes> para usuarios autenticados: */}
+          <Route
+            path="/profile"
+            element={
+              <UserProfilePage
+                user={currentUser}
+                onUserUpdated={onLoginSuccess}
+                onLogout={onLogout}
               />
             }
           />

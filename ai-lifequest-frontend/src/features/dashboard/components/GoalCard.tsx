@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { CalendarDays, Target, Trophy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CalendarDays, Target, Trophy, Pencil } from 'lucide-react';
 import type { Goal, Challenge } from '../../../core/types/index';
 import { ProgressBar } from './ProgressBar';
 import { ChallengeCard } from './ChallengeCard';
@@ -16,7 +17,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
   challenges,
   onCompleteChallenge,
 }) => {
-  // Estado para controlar el acordeón desplegable de retos
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const completedCount = challenges.filter((c) => c.status === 'COMPLETED').length;
@@ -33,12 +34,38 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           </h2>
           {goal.description && <p className="goal-description">{goal.description}</p>}
         </div>
-        {goal.targetDate && (
-          <span className="goal-date">
-            <CalendarDays className="inline-icon muted-icon" />
-            {goal.targetDate}
-          </span>
-        )}
+
+        <div className="goal-actions-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+          {/* Botón para navegar a la vista de Edición */}
+          <button
+            type="button"
+            className="edit-goal-btn"
+            onClick={() => navigate(`/goals/edit/${goal.id}`)}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-muted)',
+              padding: '0.3rem 0.6rem',
+              borderRadius: '6px',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Pencil size={14} />
+            <span>Editar</span>
+          </button>
+
+          {goal.targetDate && (
+            <span className="goal-date">
+              <CalendarDays className="inline-icon muted-icon" />
+              {goal.targetDate}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Componente Barra de Progreso */}
