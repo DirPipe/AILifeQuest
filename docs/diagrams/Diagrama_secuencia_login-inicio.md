@@ -1,4 +1,4 @@
-
+```mermaid
 sequenceDiagram
     autonumber
     actor Jugador as Usuario / Jugador
@@ -18,3 +18,4 @@ sequenceDiagram
     Back-->>API: Respuesta 200 OK (GoalApiResponse[])
     API-->>Router: Devuelve lista de Goal[]
     Router-->>Jugador: Renderiza DashboardPage con metas, retosingresados y UserXpHeader
+```

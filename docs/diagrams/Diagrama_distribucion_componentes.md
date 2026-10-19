@@ -1,4 +1,4 @@
-
+```mermaid
 graph TD
     subgraph Client ["AI LifeQuest Client (React + Vite)"]
         Main["main.tsx / App.tsx"]
@@ -57,3 +57,4 @@ graph TD
     Features --> API
     Features --> Types
     UserComp --> Calc
+```
