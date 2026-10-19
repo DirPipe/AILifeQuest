@@ -1,4 +1,4 @@
-
+```mermaid
 sequenceDiagram
     autonumber
     actor Jugador as Usuario / Jugador
@@ -34,3 +34,4 @@ sequenceDiagram
     API-->>CardUI: Devuelve { updatedXp, goalProgress }
     CardUI->>CardUI: Recalcula estado React (ProgressBar eleva % y UserXpHeader suma XP)
     CardUI-->>Jugador: Muestra badge "Completado" e incremento visual de Nivel/XP
+```
