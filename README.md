@@ -28,6 +28,16 @@ flowchart LR
   Usuario[Usuario] --> Frontend[Frontend<br/>React + Vite]
   Frontend --> API[API REST<br/>Spring Boot]
   API --> DB[(PostgreSQL)]
+
+  classDef actor fill:#C2410C,stroke:#7C2D12,color:#FFFFFF,stroke-width:2.5px
+  classDef frontend fill:#1D4ED8,stroke:#1E3A8A,color:#FFFFFF,stroke-width:2.5px
+  classDef backend fill:#6D28D9,stroke:#3B0764,color:#FFFFFF,stroke-width:2.5px
+  classDef database fill:#15803D,stroke:#14532D,color:#FFFFFF,stroke-width:2.5px
+  class Usuario actor
+  class Frontend frontend
+  class API backend
+  class DB database
+  linkStyle default stroke:#334155,stroke-width:2px
 ```
 
 El frontend consulta la API para leer y actualizar los datos persistidos en PostgreSQL. El flujo principal no depende de datos de demostración guardados en el navegador.
@@ -48,6 +58,20 @@ flowchart TD
   E --> H[Registrarse o iniciar sesión]
   H --> I[Guardar el ID del usuario]
   I --> F
+
+  classDef start fill:#0E7490,stroke:#164E63,color:#FFFFFF,stroke-width:2.5px
+  classDef decision fill:#FACC15,stroke:#A16207,color:#422006,stroke-width:2.5px
+  classDef api fill:#0369A1,stroke:#0C4A6E,color:#FFFFFF,stroke-width:2.5px
+  classDef access fill:#6D28D9,stroke:#3B0764,color:#FFFFFF,stroke-width:2.5px
+  classDef success fill:#15803D,stroke:#14532D,color:#FFFFFF,stroke-width:2.5px
+  classDef danger fill:#B91C1C,stroke:#7F1D1D,color:#FFFFFF,stroke-width:2.5px
+  class A start
+  class B,D decision
+  class C api
+  class E,H access
+  class F,I success
+  class G danger
+  linkStyle default stroke:#334155,stroke-width:2px
 ```
 
 Al registrarse o iniciar sesión, el backend devuelve los datos del usuario y el frontend guarda su `userId` en `localStorage`; después abre el panel. Al iniciar o recargar la aplicación, si ya hay un ID guardado, consulta `GET /api/users?userId=...`. Si esa consulta falla, elimina el ID del navegador y muestra el acceso. Esto no elimina la cuenta ni sus datos. La API no entrega un token de sesión.
@@ -70,6 +94,22 @@ flowchart TD
   I -- Volver --> J
   I -- Salir o desactivar --> K[Borrar el ID guardado en el navegador]
   K --> L[Mostrar inicio de sesión o registro]
+
+  classDef panel fill:#15803D,stroke:#14532D,color:#FFFFFF,stroke-width:2.5px
+  classDef decision fill:#FACC15,stroke:#A16207,color:#422006,stroke-width:2.5px
+  classDef action fill:#1D4ED8,stroke:#1E3A8A,color:#FFFFFF,stroke-width:2.5px
+  classDef progress fill:#0F766E,stroke:#134E4A,color:#FFFFFF,stroke-width:2.5px
+  classDef profile fill:#6D28D9,stroke:#3B0764,color:#FFFFFF,stroke-width:2.5px
+  classDef danger fill:#B91C1C,stroke:#7F1D1D,color:#FFFFFF,stroke-width:2.5px
+  classDef access fill:#6D28D9,stroke:#3B0764,color:#FFFFFF,stroke-width:2.5px
+  class A,B,J panel
+  class C,I decision
+  class D,E,F action
+  class G progress
+  class H profile
+  class K danger
+  class L access
+  linkStyle default stroke:#334155,stroke-width:2px
 ```
 
 Crear o editar una meta y agregar o editar un reto pendiente son operaciones independientes. Al guardar, la aplicación vuelve al panel. Al completar un reto, el backend registra la recompensa de XP, actualiza el progreso de la meta y devuelve los datos actualizados. El perfil calcula estadísticas a partir de las metas y retos. Cerrar sesión borra el ID guardado; desactivar la cuenta también cierra la sesión y conserva el historial del usuario.
@@ -189,6 +229,6 @@ La desactivación no elimina metas, retos ni XP del usuario. Una cuenta inactiva
 | `PATCH` | `/api/challenges/{challengeId}` | `goalId` requerido; `title`, `description`, `xpReward` opcionales | Reto actualizado (`200 OK`) |
 | `PATCH` | `/api/challenges/complete` | JSON con `challengeId` | Usuario, meta, reto y XP ganada (`200 OK`) |
 
-La recompensa `xpReward` debe ser al menos `1`. El cuerpo para completar un reto es `{"challengeId":"<UUID>"}`. Completar un reto ya completado o bloqueado devuelve un error de solicitud; no asigna XP otra vez.
+La recompensa `xpReward` debe ser al menos `1`. Completar un reto ya completado o bloqueado devuelve un error de solicitud; no asigna XP otra vez.
 
 Al crear un reto, `goalId` debe identificar una meta existente. En las actualizaciones, `userId` debe identificar al propietario de la meta y `goalId` debe corresponder al reto. Las solicitudes inválidas responden con `400`, las credenciales incorrectas con `401`, los recursos inexistentes con `404` y los conflictos como emails o títulos duplicados con `409`.
