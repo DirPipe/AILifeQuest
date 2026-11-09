@@ -120,7 +120,7 @@ Crear o editar una meta y agregar o editar un reto pendiente son operaciones ind
 AILifeQuest/
 ├── ai-lifequest-backend/    # API REST con Spring Boot
 ├── ai-lifequest-frontend/   # Interfaz web con React + Vite
-├── docs/                    # Diagramas del sistema y flujos
+├── docs/                    # Índice y diagramas organizados por módulo
 └── README.md                # Guía principal del proyecto
 ```
 

@@ -9,7 +9,7 @@ sequenceDiagram
     participant Back as Backend (Spring Boot HTTP API)
 
     %% 1. Creación de Meta
-    Jugador->>GoalUI: Llena formulario y presiona "🚀 Guardar Meta"
+    Jugador->>GoalUI: Llena formulario y presiona "Guardar Meta"
     GoalUI->>API: createGoal({ userId, title, description, category, targetDate })
     API->>Back: POST /api/goals (CreateGoalRequestDTO)
     Back-->>API: Respuesta 201 Created (GoalResponseDTO)
