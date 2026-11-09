@@ -15,10 +15,10 @@ Los diagramas Mermaid tienen sus exportaciones PNG en `img/` y SVG en `svg/`, de
 - [Diagrama de secuencia registro e inicio de sesión](backend/diagrams/Diagrama_Secuencia_RegistroLogin.md)
 - [Diagrama de secuencia crear metas y retos](backend/diagrams/Diagrama_Secuencia_CrearMetaYRetos.md)
 - [Diagrama de secuencia completar un reto y asignar XP](backend/diagrams/Diagrama_Secuencia_CompletarRetoXP.md)
-- [Diagrama de clases completo e interactivo](backend/diagrams/interactive/class-model/diagrama-clases.html)
+- [Diagrama de clases completo e interactivo](https://htmlpreview.github.io/?https://github.com/DirPipe/AILifeQuest/blob/main/docs/backend/diagrams/interactive/class-model/diagrama-clases.html)
 
 ## Flujos de frontend a backend
 
 - [Diagrama de secuencia inicio de sesión desde la aplicación](full-stack/diagrams/Diagrama_Secuencia_LoginInicio.md)
 - [Diagrama de secuencia ciclo principal](full-stack/diagrams/Diagrama_Secuencia_CicloPrincipal.md)
-- [Recorrido interactivo de arquitectura](full-stack/diagrams/interactive/recorrido-interactivo.html)
+- [Recorrido interactivo de arquitectura](https://htmlpreview.github.io/?https://github.com/DirPipe/AILifeQuest/blob/main/docs/full-stack/diagrams/interactive/recorrido-interactivo.html)
